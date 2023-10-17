@@ -4,7 +4,7 @@
 
 var quizJSON = {
     "info": {
-        "name":    "KPI Quiz",
+        "name":    "Quiz #2",
        	"main":    "<p>Check your KPI knowledge . If you have questions about these concepts, we recommend reviewing the material provided and speaking to your Startup Coach to discuss any challenges or concepts that you require a deeper understanding of.</p>",
         "results": "<h5>Learn More</h5><p>Etiam scelerisque, nunc ac egestas consequat, odio nibh euismod nulla, eget auctor orci nibh vel nisi. Aliquam erat volutpat. Mauris vel neque sit amet nunc gravida congue sed sit amet purus.</p>" // no comma here
     },
