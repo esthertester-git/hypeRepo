@@ -6,11 +6,11 @@ html {
 }
 
 body {
-    width: 500px;
+    width: 800px;
     margin: 0 auto;
-    border: 2px solid #ccc;
+    border: 0px solid #ccc;
     border-top: none;
-    background: #F5F8FA;
+    background: #fff;
     padding: 20px;
     font-family: Trebuchet, Arial,Helvetica,sans-serif;
     font-size: 16px;
