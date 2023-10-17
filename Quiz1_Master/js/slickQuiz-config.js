@@ -4,9 +4,9 @@
 
 var quizJSON = {
     "info": {
-        "name":    "KPI Quiz",
-       	"main":    "<p>Check your KPI knowledge . If you have questions about these concepts, we recommend reviewing the material provided and speaking to your Startup Coach to discuss any challenges or concepts that you require a deeper understanding of.</p>",
-        "results": "<p>&nbsp;</p>" // no comma here
+        "name":    "&nbsp;",
+       	"main":    "instructions go here",
+        "results": "&nbsp;" // no comma here
     },
     "questions": [
         { // Question 1 - Multiple Choice, Single True Answer
