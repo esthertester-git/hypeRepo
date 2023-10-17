@@ -1,8 +1,9 @@
 /* QUIZ STYLES */
 /* Styles to prettify the quiz page */
+@import url('https://fonts.googleapis.com/css?family=Montserrat&subset=latin');
 
 html {
-    background: #eee;
+    background: #fff;
 }
 
 body {
@@ -12,7 +13,7 @@ body {
     border-top: none;
     background: #fff;
     padding: 20px;
-    font-family: Trebuchet, Arial,Helvetica,sans-serif;
+    font-family: Montserrat,sans-serif;
     font-size: 16px;
     color: #353535;
     line-height: 1.5em;
