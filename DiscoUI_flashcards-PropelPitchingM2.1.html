@@ -479,8 +479,13 @@
       tallest = Math.max(tallest, cardH);
     });
 
-    // Lock the scene to the tallest card so the counter never moves
-    document.getElementById('scene').style.height = tallest + 'px';
+    // Lock scene to tallest card on desktop only — on mobile
+    // the counter is in the fixed top bar so it never jumps
+    if (window.innerWidth > 540) {
+      document.getElementById('scene').style.height = tallest + 'px';
+    } else {
+      document.getElementById('scene').style.height = '';
+    }
   }
 
   setCardHeights();
