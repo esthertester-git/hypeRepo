@@ -241,18 +241,13 @@
     body { padding: 16px; }
     .card-image { height: 150px; }
     .card-image img { height: 120px; }
-
-    /* Hide desktop flanking buttons */
-    .nav-row > .nav-btn { display: none; }
-
-    /* Scene takes full width */
-    .scene { width: 100%; }
-
-    /* Show mobile top nav */
-    .mobile-nav { display: flex; }
-
-    .card-counter { display: none; }
   }
+
+  /* JS adds .is-mobile to container when container width < 480px */
+  .container.is-mobile .nav-row > .nav-btn { display: none; }
+  .container.is-mobile .scene { width: 100%; flex: none; }
+  .container.is-mobile .mobile-nav { display: flex; }
+  .container.is-mobile .card-counter { display: none; }
 
   /* Mobile top nav — hidden on desktop */
   .mobile-nav {
@@ -434,7 +429,18 @@
     dotsEl.appendChild(dot);
   });
 
-  // ── Set scene height after fonts load ───────────────────────
+  // ── Responsive layout: JS toggles .is-mobile on container ──
+  const container = document.querySelector('.container');
+
+  function applyLayout() {
+    const w = container.offsetWidth;
+    container.classList.toggle('is-mobile', w < 480);
+  }
+
+  applyLayout();
+  window.addEventListener('resize', applyLayout);
+
+  // ── Set scene height after fonts load ─────────────────────
   function setSceneHeight() {
     const sceneW = scene.offsetWidth;
     if (!sceneW) return;
@@ -450,12 +456,13 @@
       maxH = Math.max(maxH, clone.offsetHeight);
       document.body.removeChild(clone);
     });
-    scene.style.height = Math.max(maxH, 200) + 'px';
+    // Add 16px buffer so dots below never get clipped
+    scene.style.height = Math.max(maxH + 16, 200) + 'px';
   }
 
   setSceneHeight();
   document.fonts.ready.then(setSceneHeight);
-  window.addEventListener('resize', setSceneHeight);
+  window.addEventListener('resize', () => { applyLayout(); setSceneHeight(); });
 
   // ── Navigation ───────────────────────────────────────────────
   function navigate(direction, targetIndex) {
