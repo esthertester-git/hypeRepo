@@ -13,7 +13,7 @@
   ───────────────────────
     <iframe src="card-slider.html"
             width="100%"
-            height="560"
+            height="640"
             frameborder="0"
             allowtransparency="true">
     </iframe>
@@ -53,7 +53,7 @@
     align-items: flex-start;
     justify-content: center;
     min-height: unset;
-    padding: 24px;
+    padding: 16px;
   }
 
   .container {
@@ -62,7 +62,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
   }
 
   /* Counter */
@@ -456,8 +456,7 @@
       maxH = Math.max(maxH, clone.offsetHeight);
       document.body.removeChild(clone);
     });
-    // Add 16px buffer so dots below never get clipped
-    scene.style.height = Math.max(maxH + 16, 200) + 'px';
+    scene.style.height = Math.max(maxH, 200) + 'px';
   }
 
   setSceneHeight();
