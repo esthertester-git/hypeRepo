@@ -452,6 +452,8 @@
     const sceneW = document.getElementById('scene').offsetWidth;
     if (!sceneW) return;
 
+    let tallest = 0;
+
     document.querySelectorAll('.card').forEach(card => {
       let maxH = 0;
       card.querySelectorAll('.card-face').forEach(face => {
@@ -472,8 +474,13 @@
         maxH = Math.max(maxH, clone.offsetHeight);
         document.body.removeChild(clone);
       });
-      card.style.height = Math.max(maxH + 16, 240) + 'px';
+      const cardH = Math.max(maxH + 16, 240);
+      card.style.height = cardH + 'px';
+      tallest = Math.max(tallest, cardH);
     });
+
+    // Lock the scene to the tallest card so the counter never moves
+    document.getElementById('scene').style.height = tallest + 'px';
   }
 
   setCardHeights();
