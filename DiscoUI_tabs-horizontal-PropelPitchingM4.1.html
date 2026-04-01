@@ -35,9 +35,10 @@
 
   BEHAVIOUR
   ──────────
-  Clicking an active tab closes it. Clicking a different
-  tab switches the content panel. On screens narrower than
-  560px the layout stacks vertically like a standard accordion.
+  Desktop: tabs sit side by side, content opens in a shared
+  panel below the full row.
+  Mobile (below 560px): stacks vertically, content opens
+  directly below the heading that was clicked.
 
   CHANGING THE PAGE TITLE
   ────────────────────────
@@ -62,10 +63,11 @@
     max-width: 660px;
   }
 
-  /* ── Tab strip ─────────────────────────────────────── */
+  /* ══ DESKTOP LAYOUT (≥560px) ═══════════════════════════ */
+
+  /* Tab strip */
   .tab-strip {
     display: flex;
-    gap: 0;
     border: 1px solid #e5e7eb;
     border-radius: 12px 12px 0 0;
     overflow: hidden;
@@ -89,14 +91,8 @@
     position: relative;
   }
 
-  .tab-btn:last-child {
-    border-right: none;
-  }
-
-  .tab-btn:hover {
-    background: #f3f4f6;
-    color: #374151;
-  }
+  .tab-btn:last-child { border-right: none; }
+  .tab-btn:hover { background: #f3f4f6; color: #374151; }
 
   .tab-btn.active {
     background: #ffffff;
@@ -104,19 +100,16 @@
     font-weight: 600;
   }
 
-  /* Blue underline indicator on active tab */
   .tab-btn.active::after {
     content: '';
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 0; left: 0; right: 0;
     height: 2.5px;
     background: #2563eb;
     border-radius: 2px 2px 0 0;
   }
 
-  /* ── Content panel ─────────────────────────────────── */
+  /* Shared content panel (desktop) */
   .panel-wrap {
     border: 1px solid #e5e7eb;
     border-top: none;
@@ -128,13 +121,9 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06);
   }
 
-  .panel-wrap.open {
-    grid-template-rows: 1fr;
-  }
+  .panel-wrap.open { grid-template-rows: 1fr; }
 
-  .panel-inner {
-    overflow: hidden;
-  }
+  .panel-inner { overflow: hidden; }
 
   .panel-content {
     padding: 24px 28px 28px;
@@ -147,62 +136,105 @@
 
   .panel-content.fade { opacity: 0; }
 
-  /* ── Mobile: stack vertically below 560px ─────────── */
+  /* Mobile inline panels — hidden on desktop */
+  .mobile-panel {
+    display: none;
+  }
+
+  /* Chevron — hidden on desktop */
+  .tab-btn .chevron { display: none; }
+
+
+  /* ══ MOBILE LAYOUT (<560px) ════════════════════════════ */
   @media (max-width: 560px) {
     body { padding: 12px; }
 
+    /* Hide desktop shared panel */
+    .panel-wrap { display: none; }
+
+    /* Stack tab strip vertically */
     .tab-strip {
       flex-direction: column;
-      border-radius: 12px 12px 0 0;
+      border-radius: 0;
+      border: none;
+      background: none;
+      gap: 0;
+    }
+
+    /* Each item is its own bordered row */
+    .tab-item {
+      border: 1px solid #e5e7eb;
+      border-bottom: none;
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    .tab-item:first-child { border-radius: 12px 12px 0 0; }
+    .tab-item:last-child  { border-radius: 0 0 12px 12px; border-bottom: 1px solid #e5e7eb; }
+
+    .tab-item.open {
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06);
+      position: relative;
+      z-index: 1;
     }
 
     .tab-btn {
+      width: 100%;
+      flex: none;
       border-right: none;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: none;
       text-align: left;
-      padding: 14px 18px;
+      padding: 16px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      background: #f9fafb;
     }
 
-    .tab-btn:last-child {
-      border-bottom: none;
+    .tab-btn:hover { background: #f3f4f6; }
+
+    .tab-item.open .tab-btn {
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+      color: #2563eb;
+      font-weight: 600;
     }
 
-    .tab-btn.active::after {
-      top: 0;
-      bottom: 0;
-      right: auto;
-      left: 0;
-      width: 3px;
-      height: auto;
-      border-radius: 0 2px 2px 0;
-    }
+    /* Remove desktop underline indicator */
+    .tab-btn.active::after { display: none; }
 
+    /* Show chevron on mobile */
     .tab-btn .chevron {
       display: block;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      color: #d1d5db;
       flex-shrink: 0;
+      color: #d1d5db;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .tab-btn.active .chevron {
+    .tab-item.open .tab-btn .chevron {
       transform: rotate(180deg);
       color: #2563eb;
     }
 
-    .panel-wrap {
-      border-radius: 0 0 12px 12px;
+    /* Inline panel per item */
+    .mobile-panel {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .panel-content { padding: 20px 18px 24px; }
-  }
+    .tab-item.open .mobile-panel { grid-template-rows: 1fr; }
 
-  /* Hide chevron on desktop */
-  @media (min-width: 561px) {
-    .tab-btn .chevron { display: none; }
+    .mobile-panel-inner { overflow: hidden; }
+
+    .mobile-panel-content {
+      padding: 16px 18px 20px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #6b7280;
+      font-weight: 400;
+    }
   }
 </style>
 </head>
@@ -243,44 +275,100 @@
   const wrap    = document.getElementById('panel-wrap');
   const content = document.getElementById('panel-content');
 
+  function isMobile() { return window.innerWidth < 560; }
+
   function toggle(index) {
+    if (isMobile()) {
+      toggleMobile(index);
+    } else {
+      toggleDesktop(index);
+    }
+  }
+
+  function toggleDesktop(index) {
     // Clicking the active tab closes it
     if (openIndex === index) {
-      document.getElementById('tab-' + index).classList.remove('active');
-      document.getElementById('tab-' + index).setAttribute('aria-expanded', 'false');
+      getItem(index).classList.remove('active');
       wrap.classList.remove('open');
       openIndex = null;
       return;
     }
 
-    // Fade out current content if switching tabs
+    // Switch tabs
     if (openIndex !== null) {
-      document.getElementById('tab-' + openIndex).classList.remove('active');
-      document.getElementById('tab-' + openIndex).setAttribute('aria-expanded', 'false');
+      getItem(openIndex).classList.remove('active');
       content.classList.add('fade');
     }
 
     const delay = openIndex !== null ? 150 : 0;
-
     setTimeout(() => {
       content.textContent = items[index].body;
       content.classList.remove('fade');
-      document.getElementById('tab-' + index).classList.add('active');
-      document.getElementById('tab-' + index).setAttribute('aria-expanded', 'true');
+      getItem(index).classList.add('active');
       wrap.classList.add('open');
       openIndex = index;
     }, delay);
   }
 
-  // Build tabs
+  function toggleMobile(index) {
+    const item = document.getElementById('tab-item-' + index);
+
+    // Clicking the open item closes it
+    if (openIndex === index) {
+      item.classList.remove('open');
+      getItem(index).classList.remove('active');
+      openIndex = null;
+      return;
+    }
+
+    // Close previously open item
+    if (openIndex !== null) {
+      document.getElementById('tab-item-' + openIndex).classList.remove('open');
+      getItem(openIndex).classList.remove('active');
+    }
+
+    item.classList.add('open');
+    getItem(index).classList.add('active');
+    openIndex = index;
+  }
+
+  function getItem(index) {
+    return document.getElementById('tab-' + index);
+  }
+
+  // Build tabs — each wrapped in a .tab-item div for mobile
   items.forEach((item, i) => {
+    const tabItem = document.createElement('div');
+    tabItem.className = 'tab-item';
+    tabItem.id = 'tab-item-' + i;
+
     const btn = document.createElement('button');
     btn.className = 'tab-btn';
     btn.id = 'tab-' + i;
     btn.setAttribute('aria-expanded', 'false');
     btn.innerHTML = `${item.heading}<svg class="chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     btn.onclick = () => toggle(i);
-    strip.appendChild(btn);
+
+    const mobilePanel = document.createElement('div');
+    mobilePanel.className = 'mobile-panel';
+    mobilePanel.innerHTML = `<div class="mobile-panel-inner"><div class="mobile-panel-content">${item.body}</div></div>`;
+
+    tabItem.appendChild(btn);
+    tabItem.appendChild(mobilePanel);
+    strip.appendChild(tabItem);
+  });
+
+  // Reset open state on resize so layout switches cleanly
+  window.addEventListener('resize', () => {
+    if (openIndex !== null) {
+      // Reclose everything and reopen in the correct mode
+      const idx = openIndex;
+      openIndex = null;
+      wrap.classList.remove('open');
+      document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('open'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      toggle(idx);
+    }
   });
 
   // Open first tab by default
