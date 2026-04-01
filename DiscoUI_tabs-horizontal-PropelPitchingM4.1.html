@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horizontal Accordion</title>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  HORIZONTAL ACCORDION — USAGE INSTRUCTIONS                  ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  EMBEDDING IN AN IFRAME
+  ───────────────────────
+    <iframe src="accordion-horizontal.html"
+            width="100%"
+            height="360"
+            frameborder="0"
+            allowtransparency="true">
+    </iframe>
+  Adjust height to suit your content length.
+
+  EDITING CONTENT
+  ────────────────
+  All content is in the CONTENT section at the top of the
+  <script> block near the bottom of this file:
+
+    { heading: 'Your heading', body: 'Your body text.' },
+
+  ADDING OR REMOVING ITEMS
+  ──────────────────────────
+  Add or remove objects in the items array. The tabs and
+  panel rebuild automatically — no HTML changes needed.
+  Note: more than 5 items will become cramped on desktop
+  and will stack vertically on mobile regardless.
+
+  BEHAVIOUR
+  ──────────
+  Clicking an active tab closes it. Clicking a different
+  tab switches the content panel. On screens narrower than
+  560px the layout stacks vertically like a standard accordion.
+
+  CHANGING THE PAGE TITLE
+  ────────────────────────
+  Edit the <title> tag above.
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f6f8;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: unset;
+    padding: 24px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 660px;
+  }
+
+  /* ── Tab strip ─────────────────────────────────────── */
+  .tab-strip {
+    display: flex;
+    gap: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    background: #f9fafb;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 16px 12px;
+    background: none;
+    border: none;
+    border-right: 1px solid #e5e7eb;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    line-height: 1.3;
+    text-align: center;
+    transition: background 0.15s, color 0.15s;
+    position: relative;
+  }
+
+  .tab-btn:last-child {
+    border-right: none;
+  }
+
+  .tab-btn:hover {
+    background: #f3f4f6;
+    color: #374151;
+  }
+
+  .tab-btn.active {
+    background: #ffffff;
+    color: #2563eb;
+    font-weight: 600;
+  }
+
+  /* Blue underline indicator on active tab */
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2.5px;
+    background: #2563eb;
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* ── Content panel ─────────────────────────────────── */
+  .panel-wrap {
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    background: #ffffff;
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06);
+  }
+
+  .panel-wrap.open {
+    grid-template-rows: 1fr;
+  }
+
+  .panel-inner {
+    overflow: hidden;
+  }
+
+  .panel-content {
+    padding: 24px 28px 28px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #6b7280;
+    font-weight: 400;
+    transition: opacity 0.2s;
+  }
+
+  .panel-content.fade { opacity: 0; }
+
+  /* ── Mobile: stack vertically below 560px ─────────── */
+  @media (max-width: 560px) {
+    body { padding: 12px; }
+
+    .tab-strip {
+      flex-direction: column;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .tab-btn {
+      border-right: none;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .tab-btn:last-child {
+      border-bottom: none;
+    }
+
+    .tab-btn.active::after {
+      top: 0;
+      bottom: 0;
+      right: auto;
+      left: 0;
+      width: 3px;
+      height: auto;
+      border-radius: 0 2px 2px 0;
+    }
+
+    .tab-btn .chevron {
+      display: block;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: #d1d5db;
+      flex-shrink: 0;
+    }
+
+    .tab-btn.active .chevron {
+      transform: rotate(180deg);
+      color: #2563eb;
+    }
+
+    .panel-wrap {
+      border-radius: 0 0 12px 12px;
+    }
+
+    .panel-content { padding: 20px 18px 24px; }
+  }
+
+  /* Hide chevron on desktop */
+  @media (min-width: 561px) {
+    .tab-btn .chevron { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="tab-strip" id="tab-strip"></div>
+  <div class="panel-wrap" id="panel-wrap">
+    <div class="panel-inner">
+      <div class="panel-content" id="panel-content"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── CONTENT ────────────────────────────────────────────────
+  const items = [
+    {
+      heading: 'Investors',
+      body:    'Investors are evaluating risk and return. They want to understand the size of the opportunity, the strength of your business model, and whether your team can execute. Spend more time on your market opportunity, your traction, and your financial projections. Be ready to defend your assumptions and speak confidently about what you do not know yet as well as what you do.'
+    },
+    {
+      heading: 'Customers',
+      body:    'Customers are evaluating whether you can solve their problem. They do not need your market size or your funding story. Lead strongly with the problem, make sure they recognise their own experience in your description, and focus the solution section on outcomes rather than features. Move quickly to a clear next step.'
+    },
+    {
+      heading: 'Partners',
+      body:    'Partners are evaluating whether working together makes sense for both sides. Lead with shared goals rather than your own business metrics. Explain clearly what the partnership would look like in practice, what you bring to it, and what you are looking for from them. Be specific about the kind of partnership you have in mind.'
+    },
+    {
+      heading: 'Media',
+      body:    'Journalists and media contacts are looking for a story. Lead with the problem and the people it affects. Have a single, memorable headline in mind: the one sentence you want them to take away.'
+    }
+  ];
+  // ─────────────────────────────────────────────────────────────
+
+  let openIndex = null;
+  const strip   = document.getElementById('tab-strip');
+  const wrap    = document.getElementById('panel-wrap');
+  const content = document.getElementById('panel-content');
+
+  function toggle(index) {
+    // Clicking the active tab closes it
+    if (openIndex === index) {
+      document.getElementById('tab-' + index).classList.remove('active');
+      document.getElementById('tab-' + index).setAttribute('aria-expanded', 'false');
+      wrap.classList.remove('open');
+      openIndex = null;
+      return;
+    }
+
+    // Fade out current content if switching tabs
+    if (openIndex !== null) {
+      document.getElementById('tab-' + openIndex).classList.remove('active');
+      document.getElementById('tab-' + openIndex).setAttribute('aria-expanded', 'false');
+      content.classList.add('fade');
+    }
+
+    const delay = openIndex !== null ? 150 : 0;
+
+    setTimeout(() => {
+      content.textContent = items[index].body;
+      content.classList.remove('fade');
+      document.getElementById('tab-' + index).classList.add('active');
+      document.getElementById('tab-' + index).setAttribute('aria-expanded', 'true');
+      wrap.classList.add('open');
+      openIndex = index;
+    }, delay);
+  }
+
+  // Build tabs
+  items.forEach((item, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn';
+    btn.id = 'tab-' + i;
+    btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML = `${item.heading}<svg class="chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    btn.onclick = () => toggle(i);
+    strip.appendChild(btn);
+  });
+
+  // Open first tab by default
+  toggle(0);
+</script>
+</body>
+</html>
