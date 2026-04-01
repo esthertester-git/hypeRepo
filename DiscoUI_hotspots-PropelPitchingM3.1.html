@@ -55,11 +55,11 @@
 
   body {
     font-family: 'Inter', sans-serif;
-    background: #fff;
+    background: #f4f6f8;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    min-height: 100vh;
+    min-height: unset;
     padding: 24px;
   }
 
@@ -244,9 +244,10 @@
   }
 
   @media (max-width: 500px) {
+    body { padding: 12px; }
     .diagram-wrap { padding: 20px 16px 16px; }
     .divider { margin: 0 16px; }
-    .desc-panel { padding: 20px 20px 24px; }
+    .desc-panel { padding: 20px 20px 24px; min-height: unset; }
   }
 </style>
 </head>
