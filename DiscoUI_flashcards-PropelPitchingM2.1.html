@@ -83,6 +83,12 @@
     gap: 16px;
   }
 
+  /* On desktop the nav buttons sit beside the card.
+     On mobile (<540px) they stack below via media query. */
+  .nav-buttons {
+    display: contents; /* children participate in parent flex as if unwrapped */
+  }
+
   .nav-btn {
     width: 40px;
     height: 40px;
@@ -113,7 +119,7 @@
 
   .card {
     width: 100%;
-    height: 320px;
+    min-height: 320px;
     position: relative;
     transform-style: preserve-3d;
     transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
@@ -246,6 +252,29 @@
     background: #2563eb;
     transform: scale(1.4);
   }
+
+  @media (max-width: 540px) {
+    body { padding: 16px; }
+
+    .nav-row {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .scene { width: 100%; }
+
+    .nav-buttons {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .card-face { padding: 22px 22px 68px; }
+    .card-title { font-size: 17px; }
+    .card-body-question { font-size: 15px; }
+  }
 </style>
 </head>
 <body>
@@ -254,12 +283,12 @@
   <div class="card-counter">Element <span id="current-num">1</span> of 10</div>
 
   <div class="nav-row">
-
-    <button class="nav-btn" id="prev-btn" disabled aria-label="Previous card">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M10 12.5L5.5 8L10 3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
+    <div class="nav-buttons">
+      <button class="nav-btn" id="prev-btn" disabled aria-label="Previous card">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M10 12.5L5.5 8L10 3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
 
     <div class="scene">
 
@@ -527,11 +556,12 @@ Your solution should directly answer the problem you just described.</p>
 
     </div>
 
-    <button class="nav-btn" id="next-btn" aria-label="Next card">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
+      <button class="nav-btn" id="next-btn" aria-label="Next card">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div><!-- end nav-buttons -->
 
   </div>
 
@@ -553,6 +583,28 @@ Your solution should directly answer the problem you just described.</p>
   const totalCards = 10;
   let currentIndex = 0;
   let isFlipping = false;
+
+  // Set each card's height to match its tallest face
+  function setCardHeights() {
+    document.querySelectorAll('.card').forEach(card => {
+      const faces = card.querySelectorAll('.card-face');
+      let maxH = 0;
+      faces.forEach(face => {
+        // Temporarily make visible to measure
+        const prevVis = face.style.visibility;
+        const prevPos = face.style.position;
+        face.style.visibility = 'hidden';
+        face.style.position   = 'relative';
+        maxH = Math.max(maxH, face.scrollHeight);
+        face.style.visibility = prevVis;
+        face.style.position   = prevPos;
+      });
+      card.style.height = Math.max(maxH, 320) + 'px';
+    });
+  }
+
+  setCardHeights();
+  window.addEventListener('resize', setCardHeights);
 
   function flipCard(cardId) {
     if (isFlipping) return;
