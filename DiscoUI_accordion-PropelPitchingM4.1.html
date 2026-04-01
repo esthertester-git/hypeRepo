@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accordion</title>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  ACCORDION — USAGE INSTRUCTIONS                             ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  EMBEDDING IN AN IFRAME
+  ───────────────────────
+    <iframe src="accordion.html"
+            width="100%"
+            height="400"
+            frameborder="0"
+            allowtransparency="true">
+    </iframe>
+  Adjust height to suit your content length.
+
+  EDITING CONTENT
+  ────────────────
+  All content is in the CONTENT section at the top of the
+  <script> block near the bottom of this file. Edit the
+  heading and body for each item:
+
+    { heading: 'Your heading', body: 'Your body text.' },
+
+  ADDING OR REMOVING ITEMS
+  ──────────────────────────
+  Add or remove objects in the items array. The accordion
+  rebuilds automatically — no HTML changes needed.
+
+  BEHAVIOUR
+  ──────────
+  Only one item can be open at a time. Clicking an open
+  item closes it. Clicking a different item closes the
+  current one and opens the new one.
+
+  CHANGING THE PAGE TITLE
+  ────────────────────────
+  Edit the <title> tag above.
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #fff;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: unset;
+    padding: 24px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 660px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Accordion item */
+  .accordion-item {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-bottom: none;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+
+  .accordion-item:first-child {
+    border-radius: 12px 12px 0 0;
+  }
+
+  .accordion-item:last-child {
+    border-radius: 0 0 12px 12px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .accordion-item.open {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header button */
+  .accordion-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+  }
+
+  .accordion-header:hover {
+    background: #f9fafb;
+  }
+
+  .accordion-item.open .accordion-header {
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .accordion-heading {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .accordion-item.open .accordion-heading {
+    color: #2563eb;
+  }
+
+  /* Plus / minus icon */
+  .accordion-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid #e5e7eb;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+    color: #6b7280;
+  }
+
+  .accordion-item.open .accordion-icon {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+  }
+
+  .accordion-icon svg {
+    display: block;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .accordion-item.open .accordion-icon svg {
+    transform: rotate(180deg);
+  }
+
+  /* Body panel */
+  .accordion-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .accordion-item.open .accordion-body {
+    grid-template-rows: 1fr;
+  }
+
+  .accordion-body-inner {
+    overflow: hidden;
+  }
+
+  .accordion-body-content {
+    padding: 20px 24px 24px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #6b7280;
+    font-weight: 400;
+  }
+
+  @media (max-width: 500px) {
+    body { padding: 12px; }
+    .accordion-header { padding: 16px 18px; }
+    .accordion-body-content { padding: 16px 18px 20px; }
+    .accordion-heading { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="accordion"></div>
+
+<script>
+  // ─── CONTENT ────────────────────────────────────────────────
+  const items = [
+    {
+      heading: 'Investors',
+      body:    'Investors are evaluating risk and return. They want to understand the size of the opportunity, the strength of your business model, and whether your team can execute. Spend more time on your market opportunity, your traction, and your financial projections. Be ready to defend your assumptions and speak confidently about what you do not know yet as well as what you do.'
+    },
+    {
+      heading: 'Customers',
+      body:    'Customers are evaluating whether you can solve their problem. They do not need your market size or your funding story. Lead strongly with the problem, make sure they recognise their own experience in your description, and focus the solution section on outcomes rather than features. Move quickly to a clear next step.'
+    },
+    {
+      heading: 'Partners',
+      body:    'Partners are evaluating whether working together makes sense for both sides. Lead with shared goals rather than your own business metrics. Explain clearly what the partnership would look like in practice, what you bring to it, and what you are looking for from them. Be specific about the kind of partnership you have in mind.'
+    },
+    {
+      heading: 'Media',
+      body:    'Journalists and media contacts are looking for a story. Lead with the problem and the people it affects. Have a single, memorable headline in mind: the one sentence you want them to take away.'
+    }
+  ];
+  // ─────────────────────────────────────────────────────────────
+
+  let openIndex = null;
+  const container = document.getElementById('accordion');
+
+  // Build accordion
+  items.forEach((item, i) => {
+    const el = document.createElement('div');
+    el.className = 'accordion-item';
+    el.id = 'item-' + i;
+    el.innerHTML = `
+      <button class="accordion-header" onclick="toggle(${i})" aria-expanded="false" aria-controls="body-${i}">
+        <span class="accordion-heading">${item.heading}</span>
+        <span class="accordion-icon">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </button>
+      <div class="accordion-body" id="body-${i}" role="region">
+        <div class="accordion-body-inner">
+          <div class="accordion-body-content">${item.body}</div>
+        </div>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+
+  function toggle(index) {
+    // Close currently open item
+    if (openIndex !== null && openIndex !== index) {
+      close(openIndex);
+    }
+
+    const item = document.getElementById('item-' + index);
+    const isOpen = item.classList.contains('open');
+
+    if (isOpen) {
+      close(index);
+    } else {
+      open(index);
+    }
+  }
+
+  function open(index) {
+    const item   = document.getElementById('item-' + index);
+    const header = item.querySelector('.accordion-header');
+    item.classList.add('open');
+    header.setAttribute('aria-expanded', 'true');
+    openIndex = index;
+  }
+
+  function close(index) {
+    const item   = document.getElementById('item-' + index);
+    const header = item.querySelector('.accordion-header');
+    item.classList.remove('open');
+    header.setAttribute('aria-expanded', 'false');
+    if (openIndex === index) openIndex = null;
+  }
+</script>
+</body>
+</html>
