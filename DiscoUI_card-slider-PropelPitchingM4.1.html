@@ -23,24 +23,19 @@
   All content is in the CONTENT section at the top of the
   <script> block. Each card has:
     title  — the card heading
-    image  — path to your image file, e.g. 'images/photo.jpg'
-             Leave as '' to show the placeholder graphic.
+    image  — path to your image file, e.g. '1_in-person.svg'
+              Leave as '' to show the placeholder graphic.
     body   — the body text below the image
 
-  COLOUR CYCLING
-  ──────────────
-  Cards automatically cycle through 3 complementary colour
-  schemes. The cycle is defined in the colorSchemes array
-  in the <script> block — adjust there if needed.
+  LAYOUT
+  ──────
+  Desktop: nav arrows flank the card on left and right.
+  Mobile (container < 480px): arrows move to a top bar
+  flanking the counter. Layout switches via JS class.
 
-  ADDING OR REMOVING CARDS
-  ──────────────────────────
-  Add or remove objects in the items array. The counter,
-  dots, and nav buttons update automatically.
-
-  CHANGING THE PAGE TITLE
-  ────────────────────────
-  Edit the <title> tag above.
+  FILES REQUIRED IN THE SAME FOLDER
+  ────────────────────────────────────
+  card-slider.html, 1_in-person.svg, 2_online.svg, 3_informal.svg
 -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -65,7 +60,7 @@
     gap: 12px;
   }
 
-  /* Counter */
+  /* ── Desktop counter (hidden on mobile) */
   .card-counter {
     font-size: 12px;
     font-weight: 500;
@@ -74,17 +69,37 @@
     color: #6b7280;
   }
 
-  /* Nav row */
-  .nav-row {
+  /* ── Mobile top nav: arrows flank counter (hidden on desktop) */
+  .top-nav {
+    display: none;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .top-nav-counter {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #6b7280;
+    flex: 1;
+    text-align: center;
+  }
+
+  /* ── Main row: [prev] [scene] [next] */
+  .main-row {
     width: 100%;
     display: flex;
     align-items: center;
     gap: 16px;
   }
 
+  /* Nav buttons */
   .nav-btn {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     border: 1.5px solid #e5e7eb;
     background: #ffffff;
@@ -105,13 +120,13 @@
 
   .nav-btn:disabled { opacity: 0.3; cursor: default; }
 
-  /* Scene — clips the cards as they fly in/out */
+  /* Scene — clips the animation */
   .scene {
     flex: 1;
     position: relative;
     overflow: hidden;
-    /* Height set by JS after measuring cards */
     border-radius: 16px;
+    /* height set by JS */
   }
 
   /* Individual card */
@@ -124,7 +139,6 @@
     display: flex;
     flex-direction: column;
     gap: 14px;
-    /* Default: off-screen right */
     transform: translateX(110%) rotate(6deg);
     opacity: 0;
     transition:
@@ -133,39 +147,20 @@
     will-change: transform, opacity;
   }
 
-  /* Active card — centred, no rotation */
-  .card.is-active {
-    transform: translateX(0) rotate(0deg);
-    opacity: 1;
-  }
+  .card.is-active   { transform: translateX(0) rotate(0deg); opacity: 1; }
+  .card.exit-left   { transform: translateX(-110%) rotate(-6deg); opacity: 0; }
+  .card.exit-right  { transform: translateX(110%) rotate(6deg); opacity: 0; }
 
-  /* Exiting to the left (going forward) */
-  .card.exit-left {
-    transform: translateX(-110%) rotate(-6deg);
-    opacity: 0;
-  }
-
-  /* Exiting to the right (going back) */
-  .card.exit-right {
-    transform: translateX(110%) rotate(6deg);
-    opacity: 0;
-  }
-
-  /* Entering from the right (going forward) — off-screen start position */
   .card.enter-from-right {
     transform: translateX(110%) rotate(6deg);
-    opacity: 0;
-    transition: none;
+    opacity: 0; transition: none;
   }
-
-  /* Entering from the left (going back) — off-screen start position */
   .card.enter-from-left {
     transform: translateX(-110%) rotate(-6deg);
-    opacity: 0;
-    transition: none;
+    opacity: 0; transition: none;
   }
 
-  /* Card image area */
+  /* Card image */
   .card-image {
     width: 100%;
     height: 200px;
@@ -182,23 +177,6 @@
     height: 144px;
     object-fit: contain;
     display: block;
-  }
-
-  /* Placeholder shown when no image provided */
-  .card-image-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-  }
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    opacity: 0.5;
   }
 
   /* Card text */
@@ -219,7 +197,6 @@
     display: flex;
     gap: 6px;
     align-items: center;
-    flex-wrap: wrap;
     justify-content: center;
   }
 
@@ -237,84 +214,66 @@
     transform: scale(1.4);
   }
 
+  /* ── Mobile overrides via JS .is-mobile class ────────────── */
+  .container.is-mobile .card-counter     { display: none; }
+  .container.is-mobile .top-nav          { display: flex; }
+  .container.is-mobile .main-row .nav-btn { display: none; }
+  .container.is-mobile .scene            { flex: none; width: 100%; }
+
   @media (max-width: 500px) {
-    body { padding: 16px; }
-    .card-image { height: 150px; }
+    body { padding: 12px; }
+    .card-image { height: 160px; }
     .card-image img { height: 120px; }
-  }
-
-  /* JS adds .is-mobile to container when container width < 480px */
-  .container.is-mobile .nav-row > .nav-btn { display: none; }
-  .container.is-mobile .scene { width: 100%; flex: none; }
-  .container.is-mobile .mobile-nav { display: flex; }
-  .container.is-mobile .card-counter { display: none; }
-
-  /* Mobile top nav — hidden on desktop */
-  .mobile-nav {
-    display: none;
-    width: 100%;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  .mobile-nav .nav-btn { width: 36px; height: 36px; flex-shrink: 0; }
-
-  .mobile-counter {
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: #6b7280;
-    flex: 1;
-    text-align: center;
+    .card-title { font-size: 16px; }
+    .card-body  { font-size: 13px; line-height: 1.6; }
   }
 </style>
 </head>
 <body>
-<div class="container">
+<div class="container" id="container">
 
+  <!-- Desktop counter -->
   <div class="card-counter">
     Situation <span id="current-num">1</span> of <span id="total-num">3</span>
   </div>
 
-  <!-- Mobile top nav: arrows flank the counter -->
-  <div class="mobile-nav">
-    <button class="nav-btn" id="prev-btn-m" disabled aria-label="Previous card">
+  <!-- Mobile top nav -->
+  <div class="top-nav" id="top-nav">
+    <button class="nav-btn" id="prev-btn-m" disabled aria-label="Previous">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M10 12.5L5.5 8L10 3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
-    <span class="mobile-counter">Situation <span id="current-num-m">1</span> of <span id="total-num-m">3</span></span>
-    <button class="nav-btn" id="next-btn-m" aria-label="Next card">
+    <span class="top-nav-counter">Situation <span id="current-num-m">1</span> of <span id="total-num-m">3</span></span>
+    <button class="nav-btn" id="next-btn-m" aria-label="Next">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
   </div>
 
-  <div class="nav-row">
-    <button class="nav-btn" id="prev-btn" disabled aria-label="Previous card">
+  <!-- Main row -->
+  <div class="main-row">
+    <button class="nav-btn" id="prev-btn" disabled aria-label="Previous">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M10 12.5L5.5 8L10 3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
-
     <div class="scene" id="scene"></div>
-
-    <button class="nav-btn" id="next-btn" aria-label="Next card">
+    <button class="nav-btn" id="next-btn" aria-label="Next">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
   </div>
 
+  <!-- Dots always below, never inside main-row -->
   <div class="dots" id="dots"></div>
 
 </div>
 
 <script>
-  // ─── COLOUR SCHEMES (cycles through cards) ───────────────────
+    // ─── COLOUR SCHEMES (cycles through cards) ───────────────────
   const colorSchemes = [
     {
       bg:        '#ffffff',
@@ -366,19 +325,23 @@
       body:  'Aim for a natural, conversational tone rather than a polished performance. Start with your one-liner and let the other person\'s response guide where you go next. The goal is engagement, not completion.'
     },
   ];
+
   // ─────────────────────────────────────────────────────────────
 
   let currentIndex = 0;
   let isAnimating  = false;
   const total      = items.length;
 
-  const scene    = document.getElementById('scene');
-  const dotsEl   = document.getElementById('dots');
-  const prevBtn  = document.getElementById('prev-btn');
-  const nextBtn  = document.getElementById('next-btn');
+  const container = document.getElementById('container');
+  const scene     = document.getElementById('scene');
+  const dotsEl    = document.getElementById('dots');
+  const prevBtn   = document.getElementById('prev-btn');
+  const nextBtn   = document.getElementById('next-btn');
+  const prevBtnM  = document.getElementById('prev-btn-m');
+  const nextBtnM  = document.getElementById('next-btn-m');
 
   document.getElementById('total-num').textContent   = total;
-  document.getElementById('total-num-m').textContent  = total;
+  document.getElementById('total-num-m').textContent = total;
 
   // ── Build cards ─────────────────────────────────────────────
   items.forEach((item, i) => {
@@ -387,24 +350,19 @@
     card.className = 'card';
     card.id = 'card-' + i;
 
-    // Image / icon markup
     let imageHTML;
     if (item.image) {
       imageHTML = `<div class="card-image" style="background:${scheme.imgBg}">
         <img src="${item.image}" alt="${item.title}">
       </div>`;
     } else {
-      imageHTML = `
-        <div class="card-image" style="background:${scheme.imgBg}">
-          <div class="card-image-placeholder">
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-              <rect x="4" y="8" width="32" height="24" rx="3" stroke="${scheme.imgIcon}" stroke-width="1.5"/>
-              <circle cx="14" cy="17" r="3" stroke="${scheme.imgIcon}" stroke-width="1.5"/>
-              <path d="M4 26l8-6 6 5 5-4 9 7" stroke="${scheme.imgIcon}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span style="color:${scheme.imgLabel}">Image</span>
-          </div>
-        </div>`;
+      imageHTML = `<div class="card-image" style="background:${scheme.imgBg};display:flex;align-items:center;justify-content:center;">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect x="4" y="8" width="32" height="24" rx="3" stroke="${scheme.imgIcon}" stroke-width="1.5"/>
+          <circle cx="14" cy="17" r="3" stroke="${scheme.imgIcon}" stroke-width="1.5"/>
+          <path d="M4 26l8-6 6 5 5-4 9 7" stroke="${scheme.imgIcon}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>`;
     }
 
     card.innerHTML = `
@@ -412,15 +370,13 @@
       ${imageHTML}
       <div class="card-body" style="color:${scheme.body}">${item.body}</div>
     `;
-
     card.style.background = scheme.bg;
     card.style.border      = scheme.border;
     card.style.boxShadow   = scheme.shadow;
-
     scene.appendChild(card);
   });
 
-  // Build dots
+  // ── Build dots ───────────────────────────────────────────────
   items.forEach((_, i) => {
     const dot = document.createElement('div');
     dot.className = 'dot';
@@ -429,18 +385,12 @@
     dotsEl.appendChild(dot);
   });
 
-  // ── Responsive layout: JS toggles .is-mobile on container ──
-  const container = document.querySelector('.container');
-
+  // ── Layout: JS toggles .is-mobile based on container width ──
   function applyLayout() {
-    const w = container.offsetWidth;
-    container.classList.toggle('is-mobile', w < 480);
+    container.classList.toggle('is-mobile', container.offsetWidth < 480);
   }
 
-  applyLayout();
-  window.addEventListener('resize', applyLayout);
-
-  // ── Set scene height after fonts load ─────────────────────
+  // ── Scene height: measure tallest card ──────────────────────
   function setSceneHeight() {
     const sceneW = scene.offsetWidth;
     if (!sceneW) return;
@@ -448,9 +398,10 @@
     document.querySelectorAll('.card').forEach(card => {
       const clone = card.cloneNode(true);
       clone.style.cssText = [
-        'position:fixed', 'top:-9999px', 'left:0',
+        'position:fixed', 'visibility:hidden', 'pointer-events:none',
+        'top:-9999px', 'left:0',
         'width:' + sceneW + 'px', 'height:auto',
-        'transform:none', 'opacity:1', 'visibility:hidden'
+        'transform:none', 'opacity:1', 'display:flex'
       ].join(';');
       document.body.appendChild(clone);
       maxH = Math.max(maxH, clone.offsetHeight);
@@ -459,6 +410,8 @@
     scene.style.height = Math.max(maxH, 200) + 'px';
   }
 
+  // Run layout first so scene has correct width before measuring
+  applyLayout();
   setSceneHeight();
   document.fonts.ready.then(setSceneHeight);
   window.addEventListener('resize', () => { applyLayout(); setSceneHeight(); });
@@ -469,35 +422,22 @@
     const newIndex = targetIndex !== undefined
       ? targetIndex
       : direction === 'next' ? currentIndex + 1 : currentIndex - 1;
-
     if (newIndex < 0 || newIndex >= total) return;
     isAnimating = true;
 
     const outgoing = document.getElementById('card-' + currentIndex);
     const incoming = document.getElementById('card-' + newIndex);
 
-    // Position incoming off-screen instantly (no transition)
     incoming.classList.add(direction === 'next' ? 'enter-from-right' : 'enter-from-left');
-    incoming.style.display = 'flex';
-
-    // Force reflow so the browser registers the off-screen position
     incoming.offsetHeight;
-
-    // Remove the instant-position class and start both transitions
     incoming.classList.remove('enter-from-right', 'enter-from-left');
-
-    // Outgoing exits in the opposite direction
     outgoing.classList.remove('is-active');
     outgoing.classList.add(direction === 'next' ? 'exit-left' : 'exit-right');
-
-    // Incoming settles to centre
     incoming.classList.add('is-active');
 
-    // Update state
     currentIndex = newIndex;
     updateUI();
 
-    // Clean up after animation
     setTimeout(() => {
       outgoing.classList.remove('exit-left', 'exit-right');
       isAnimating = false;
@@ -508,20 +448,20 @@
     const n = currentIndex + 1;
     document.getElementById('current-num').textContent   = n;
     document.getElementById('current-num-m').textContent = n;
-    prevBtn.disabled = currentIndex === 0;
-    nextBtn.disabled = currentIndex === total - 1;
-    document.getElementById('prev-btn-m').disabled = currentIndex === 0;
-    document.getElementById('next-btn-m').disabled = currentIndex === total - 1;
+    prevBtn.disabled  = currentIndex === 0;
+    nextBtn.disabled  = currentIndex === total - 1;
+    prevBtnM.disabled = currentIndex === 0;
+    nextBtnM.disabled = currentIndex === total - 1;
     document.querySelectorAll('.dot').forEach((d, i) =>
       d.classList.toggle('active', i === currentIndex));
   }
 
-  prevBtn.addEventListener('click', () => navigate('prev'));
-  nextBtn.addEventListener('click', () => navigate('next'));
-  document.getElementById('prev-btn-m').addEventListener('click', () => navigate('prev'));
-  document.getElementById('next-btn-m').addEventListener('click', () => navigate('next'));
+  prevBtn.addEventListener('click',  () => navigate('prev'));
+  nextBtn.addEventListener('click',  () => navigate('next'));
+  prevBtnM.addEventListener('click', () => navigate('prev'));
+  nextBtnM.addEventListener('click', () => navigate('next'));
 
-  // ── Initialise first card ────────────────────────────────────
+  // ── Initialise ───────────────────────────────────────────────
   document.getElementById('card-0').classList.add('is-active');
   updateUI();
 </script>
