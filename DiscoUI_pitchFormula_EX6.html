@@ -305,6 +305,25 @@
     audioBtn.classList.remove('playing');
     audioBtn.setAttribute('aria-label', 'Play audio example');
   });
+
+  // ── iframe height communication ──────────────────────────────────────────
+  // Posts the document's scroll height to the parent page so the iframe
+  // can be resized to fit content. Fires on load and whenever content
+  // changes (e.g. example panel animating open).
+  function postHeight() {
+    const h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ type: 'resize', height: h }, '*');
+  }
+
+  // Fire once fonts and layout are settled
+  document.fonts.ready.then(postHeight);
+
+  // Re-fire whenever any element changes size (covers the accordion open animation)
+  if (window.ResizeObserver) {
+    new ResizeObserver(postHeight).observe(document.body);
+  } else {
+    window.addEventListener('resize', postHeight);
+  }
 </script>
 </body>
 </html>
