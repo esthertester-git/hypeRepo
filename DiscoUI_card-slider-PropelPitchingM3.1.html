@@ -11,12 +11,26 @@
 
   EMBEDDING IN AN IFRAME
   ───────────────────────
-    <iframe src="DiscoUI_card-slider-PropelPitchingM3_2.html"
+  In the parent page, add the iframe and a message listener so the
+  height adjusts automatically to fit the tallest card:
+
+    IFRAME TAG:
+    <iframe id="card-slider"
+            src="DiscoUI_card-slider-PropelPitchingM3_2.html"
             width="100%"
-            height="640"
+            height="600"
             frameborder="0"
-            allowtransparency="true">
-    </iframe>
+            allowtransparency="true"></iframe>
+
+    PARENT SCRIPT:
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.frameHeight) {
+        document.getElementById('card-slider').style.height
+          = e.data.frameHeight + 'px';
+      }
+    });
+
+  height="600" is a safe initial fallback while fonts load.
 
   EDITING CARD CONTENT
   ──────────────────────
@@ -424,10 +438,16 @@
     scene.style.height = Math.max(maxH, 200) + 'px';
   }
 
+  function notifyHeight() {
+    const h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ frameHeight: h }, '*');
+  }
+
   applyLayout();
   setSceneHeight();
-  document.fonts.ready.then(setSceneHeight);
-  window.addEventListener('resize', () => { applyLayout(); setSceneHeight(); });
+  notifyHeight();
+  document.fonts.ready.then(() => { setSceneHeight(); notifyHeight(); });
+  window.addEventListener('resize', () => { applyLayout(); setSceneHeight(); notifyHeight(); });
 
   // ── Navigation ───────────────────────────────────────────────
   function navigate(direction, targetIndex) {
