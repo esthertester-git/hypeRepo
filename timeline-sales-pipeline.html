@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<!--
+  Sales Pipeline — Disco UI
+  Recommended iframe size: 660 × 740 px
+  File name: timeline-sales-pipeline.html
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Pipeline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #ffffff;
+      color: #111827;
+      min-height: unset;
+      align-items: flex-start;
+    }
+
+    #pw {
+      max-width: 660px;
+      margin: 0 auto;
+      padding: 24px 16px 0;
+    }
+
+    /* Mobile layout via container-width JS */
+    #pw.is-mobile .stage-spacer { display: none; }
+    #pw.is-mobile .stage-row { justify-content: flex-start; }
+    #pw.is-mobile .stage-row.right > *:nth-child(1),
+    #pw.is-mobile .stage-row.left  > *:nth-child(1) { display: none; }
+    #pw.is-mobile .s-card { width: calc(100% - 64px); }
+
+    /* ── Counter ─────────────────────────────────────── */
+    .stage-counter {
+      font-size: 10px; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: #9ca3af;
+      text-align: center; margin-bottom: 20px;
+    }
+
+    /* ── Timeline spine ──────────────────────────────── */
+    .timeline { position: relative; padding-bottom: 4px; }
+    .timeline::before {
+      content: ''; position: absolute; left: 50%; top: 14px; bottom: 14px;
+      width: 2px; background: #e5e7eb; transform: translateX(-50%);
+      border-radius: 2px; z-index: 0;
+    }
+    #pw.is-mobile .timeline::before { left: 14px; }
+
+    .tl-fill {
+      position: absolute; left: 50%; top: 14px; width: 2px;
+      background: #2563eb; transform: translateX(-50%);
+      border-radius: 2px; z-index: 1; height: 0;
+      transition: height .55s cubic-bezier(.22,1,.36,1);
+    }
+    #pw.is-mobile .tl-fill { left: 14px; }
+
+    /* ── Stage rows ──────────────────────────────────── */
+    .stage-row {
+      display: flex; align-items: center;
+      position: relative; margin-bottom: 16px; min-height: 72px;
+    }
+
+    .stage-row.right > *:nth-child(1) { order: 0; }
+    .stage-row.right > *:nth-child(2) { order: 1; }
+    .stage-row.right > *:nth-child(3) { order: 2; }
+    .stage-row.right > *:nth-child(4) { order: 3; }
+    .stage-row.right > *:nth-child(5) { order: 4; }
+
+    .stage-row.left  > *:nth-child(1) { order: 4; }
+    .stage-row.left  > *:nth-child(2) { order: 3; }
+    .stage-row.left  > *:nth-child(3) { order: 2; }
+    .stage-row.left  > *:nth-child(4) { order: 1; }
+    .stage-row.left  > *:nth-child(5) { order: 0; }
+
+    .stage-spacer { width: calc(50% - 38px); flex-shrink: 0; }
+
+    /* ── Connectors ──────────────────────────────────── */
+    .s-conn {
+      width: 24px; height: 2px; flex-shrink: 0;
+      background: #e5e7eb; z-index: 2; position: relative;
+      transition: background .35s;
+    }
+    .stage-row.done   .s-conn,
+    .stage-row.active .s-conn { background: #2563eb; }
+
+    /* ── Node ────────────────────────────────────────── */
+    .s-node {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: #ffffff; border: 2px solid #e5e7eb;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 3; position: relative; color: #9ca3af;
+      transition: background .3s, border-color .3s, box-shadow .3s,
+                  transform .3s cubic-bezier(.22,1,.36,1);
+    }
+    .stage-row.done   .s-node,
+    .stage-row.active .s-node { background: #2563eb; border-color: #2563eb; color: #ffffff; }
+    .stage-row.active .s-node {
+      box-shadow: 0 0 0 5px rgba(37,99,235,.15);
+      transform: scale(1.18);
+    }
+
+    /* ── Card ────────────────────────────────────────── */
+    .s-card {
+      width: calc(50% - 38px); flex-shrink: 0;
+      background: #ffffff; border: 1.5px solid #e5e7eb;
+      border-radius: 16px; padding: 12px 14px;
+      cursor: pointer; z-index: 2; position: relative;
+      transition: border-color .3s, box-shadow .3s, transform .25s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.05);
+    }
+    .s-card:hover { border-color: #bfdbfe; transform: translateY(-1px); }
+    .stage-row.active .s-card {
+      border-color: #2563eb;
+      box-shadow: 0 1px 3px rgba(37,99,235,.12), 0 8px 24px rgba(37,99,235,.18);
+    }
+    .stage-row.done .s-card { border-color: #bfdbfe; background: #eff6ff; }
+
+    .c-lbl {
+      font-size: 10px; font-weight: 600; letter-spacing: .07em;
+      text-transform: uppercase; color: #9ca3af; margin-bottom: 2px;
+      transition: color .3s;
+    }
+    .stage-row.active .c-lbl { color: #2563eb; }
+    .stage-row.done   .c-lbl { color: #93c5fd; }
+
+    /* Title + description revealed on activation */
+    .c-title {
+      font-size: 15px; font-weight: 600; color: #111827; line-height: 1.3;
+      max-height: 0; overflow: hidden; opacity: 0; margin-top: 0;
+      transition: max-height .45s cubic-bezier(.22,1,.36,1), opacity .35s, margin .35s;
+    }
+    .c-desc {
+      font-size: 13px; font-weight: 400; color: #6b7280; line-height: 1.6;
+      max-height: 0; overflow: hidden; opacity: 0; margin-top: 0;
+      transition: max-height .45s cubic-bezier(.22,1,.36,1), opacity .35s, margin .35s;
+    }
+    .stage-row.active .c-title,
+    .stage-row.done   .c-title { max-height: 60px;  opacity: 1; margin-top: 3px; }
+    .stage-row.active .c-desc,
+    .stage-row.done   .c-desc  { max-height: 100px; opacity: 1; margin-top: 4px; }
+
+    /* ── Outcome buttons (Closed stage) ──────────────── */
+    .outcome-wrap {
+      max-height: 0; overflow: hidden; opacity: 0; margin-top: 0;
+      transition: max-height .4s cubic-bezier(.22,1,.36,1), opacity .3s, margin .3s;
+    }
+    .stage-row.active .outcome-wrap { max-height: 60px; opacity: 1; margin-top: 10px; }
+    .outcome-row { display: flex; gap: 8px; }
+
+    .o-btn {
+      flex: 1; padding: 6px 10px; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+      cursor: pointer; outline: none;
+      /* All colour states applied as inline styles via JS */
+    }
+
+    /* ── Next action panel ───────────────────────────── */
+    .na-panel {
+      margin-top: 16px; margin-bottom: 20px;
+      border: 1.5px solid #e5e7eb; border-radius: 16px;
+      padding: 0 18px; background: #ffffff;
+      max-height: 0; overflow: hidden; opacity: 0;
+      transition: max-height .55s cubic-bezier(.22,1,.36,1),
+                  opacity .4s, padding .4s, border-color .3s, background .3s;
+    }
+    .na-panel.visible {
+      max-height: 240px; opacity: 1; padding: 16px 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.08);
+    }
+    .na-lbl {
+      font-size: 10px; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .na-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: currentColor; flex-shrink: 0;
+      animation: pdot 1.8s ease-in-out infinite;
+    }
+    @keyframes pdot {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%     { opacity: .4; transform: scale(.7); }
+    }
+    .na-text { font-size: 14px; font-weight: 400; line-height: 1.7; }
+
+    /* ── Nav ─────────────────────────────────────────── */
+    .nav-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; padding: 8px 0 20px;
+    }
+    .nav-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 1.5px solid #e5e7eb; background: #ffffff;
+      color: #374151; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .2s, color .2s;
+    }
+    .nav-btn:hover:not([disabled]) { border-color: #2563eb; color: #2563eb; }
+    .nav-btn[disabled] { opacity: .3; cursor: default; }
+    .nav-lbl {
+      font-size: 12px; font-weight: 500; color: #9ca3af;
+      min-width: 100px; text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">
+  Sales pipeline stages — click each stage to reveal details and next actions
+</h2>
+
+<div id="pw">
+  <div class="stage-counter" id="sc">Stage 1 of 5</div>
+
+  <div class="timeline" id="tl">
+    <div class="tl-fill" id="fill"></div>
+  </div>
+
+  <div class="na-panel" id="nap">
+    <div class="na-lbl"><span class="na-dot"></span><span id="na-heading"></span></div>
+    <div class="na-text" id="na-text"></div>
+  </div>
+
+  <div class="nav-row">
+    <button class="nav-btn" id="bprev" disabled>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span class="nav-lbl" id="nlbl">Prospect</span>
+    <button class="nav-btn" id="bnext">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  const STAGES = [
+    {
+      name: 'Prospect', lbl: 'Stage 01', side: 'right',
+      desc: 'Identified as a potential fit but not yet contacted.',
+      icon: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M1.5 10.5c0-2.485 2.015-4.5 4.5-4.5s4.5 2.015 4.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>'
+    },
+    {
+      name: 'Contacted', lbl: 'Stage 02', side: 'left',
+      desc: 'Initial outreach sent, awaiting response.',
+      icon: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 2.5h10a.5.5 0 01.5.5v6a.5.5 0 01-.5.5H1a.5.5 0 01-.5-.5V3a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.3"/><path d="M.5 3l5.5 4 5.5-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'
+    },
+    {
+      name: 'Conversation', lbl: 'Stage 03', side: 'right',
+      desc: 'In active dialogue — calls, emails, and demos.',
+      icon: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10.5 2H1.5A.5.5 0 001 2.5v5a.5.5 0 00.5.5h2l1.5 2 1.5-2h4a.5.5 0 00.5-.5v-5a.5.5 0 00-.5-.5z" stroke="currentColor" stroke-width="1.3"/></svg>'
+    },
+    {
+      name: 'Proposal', lbl: 'Stage 04', side: 'left',
+      desc: 'A specific offer or next step has been shared.',
+      icon: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1.5" y="1" width="9" height="10" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 4h5M3.5 6.5h5M3.5 9h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>'
+    },
+    {
+      name: 'Closed', lbl: 'Stage 05', side: 'right', isClosed: true,
+      desc: 'Won or lost — and note why.',
+      icon: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6.5l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    }
+  ];
+
+  const NA = {
+    won: {
+      heading:    'Next action — Closed Won',
+      text:       'Send a personalised welcome message to your new client within 24 hours. Introduce them to their customer success or onboarding contact and schedule a kickoff meeting for the week ahead. Update your pipeline to Closed Won, document the key factors that sealed the deal, and, once the client is settled, ask whether they would be willing to provide a referral or testimonial.',
+      border:     '#86efac',
+      bg:         '#f0fdf4',
+      labelColor: '#16a34a',
+      textColor:  '#166534'
+    },
+    lost: {
+      heading:    'Next action — Closed Lost',
+      text:       'Update your CRM to Closed Lost and record the primary reason in as much detail as possible (price, timing, a competitor chosen, or no decision made). Send a brief, gracious closing email thanking the prospect for their time and leaving the door open for the future. Set a re-engagement reminder for three to six months from now in case their circumstances change.',
+      border:     '#fca5a5',
+      bg:         '#fff1f2',
+      labelColor: '#dc2626',
+      textColor:  '#991b1b'
+    }
+  };
+
+  const BTN_DEFAULT = { background: '#ffffff', border: '1.5px solid #e5e7eb', color: '#374151' };
+  const BTN_WON     = { background: '#f0fdf4', border: '1.5px solid #16a34a', color: '#16a34a' };
+  const BTN_LOST    = { background: '#fff1f2', border: '1.5px solid #dc2626', color: '#dc2626' };
+
+  function applyBtnStyle(el, styles) { Object.assign(el.style, styles); }
+
+  let current = 0, outcome = null;
+  let wonBtn, lostBtn;
+
+  function buildTimeline() {
+    const tl = document.getElementById('tl');
+
+    STAGES.forEach((s, i) => {
+      const row    = document.createElement('div');
+      row.className = `stage-row ${s.side}`;
+      row.id        = `row-${i}`;
+
+      const spacer = document.createElement('div'); spacer.className = 'stage-spacer';
+      const c1     = document.createElement('div'); c1.className = 's-conn';
+      const c2     = document.createElement('div'); c2.className = 's-conn';
+
+      const node    = document.createElement('div');
+      node.className = 's-node';
+      node.innerHTML = s.icon;
+      node.addEventListener('click', () => go(i));
+
+      const card    = document.createElement('div');
+      card.className = 's-card';
+      card.addEventListener('click', () => go(i));
+      card.innerHTML = `
+        <div class="c-lbl">${s.lbl}</div>
+        <div class="c-title">${s.name}</div>
+        <div class="c-desc">${s.desc}</div>
+        ${s.isClosed ? `<div class="outcome-wrap"><div class="outcome-row">
+          <button class="o-btn" id="obtn-won">Won</button>
+          <button class="o-btn" id="obtn-lost">Lost</button>
+        </div></div>` : ''}
+      `;
+
+      row.append(spacer, c1, node, c2, card);
+      tl.appendChild(row);
+    });
+
+    wonBtn  = document.getElementById('obtn-won');
+    lostBtn = document.getElementById('obtn-lost');
+    applyBtnStyle(wonBtn,  BTN_DEFAULT);
+    applyBtnStyle(lostBtn, BTN_DEFAULT);
+    wonBtn.addEventListener('click',  e => { e.stopPropagation(); choose('won');  });
+    lostBtn.addEventListener('click', e => { e.stopPropagation(); choose('lost'); });
+  }
+
+  function go(i) {
+    current = i;
+    if (i < STAGES.length - 1) outcome = null;
+    render();
+  }
+
+  function choose(o) {
+    outcome = o;
+    render();
+  }
+
+  function render() {
+    STAGES.forEach((_, i) => {
+      const row = document.getElementById(`row-${i}`);
+      row.classList.toggle('active', i === current);
+      row.classList.toggle('done',   i < current);
+    });
+
+    if (wonBtn && lostBtn) {
+      applyBtnStyle(wonBtn,  outcome === 'won'  ? BTN_WON  : BTN_DEFAULT);
+      applyBtnStyle(lostBtn, outcome === 'lost' ? BTN_LOST : BTN_DEFAULT);
+    }
+
+    // Fill bar
+    const allNodes = document.querySelectorAll('.s-node');
+    if (allNodes.length) {
+      const tl     = document.getElementById('tl');
+      const tlTop  = tl.getBoundingClientRect().top;
+      const firstR = allNodes[0].getBoundingClientRect();
+      const curR   = allNodes[current].getBoundingClientRect();
+      const startY = firstR.top - tlTop + firstR.height / 2;
+      const endY   = curR.top  - tlTop + curR.height  / 2;
+      const fill   = document.getElementById('fill');
+      fill.style.top    = startY + 'px';
+      fill.style.height = Math.max(0, endY - startY) + 'px';
+    }
+
+    // Next action panel
+    const nap    = document.getElementById('nap');
+    const showNA = current === STAGES.length - 1 && outcome !== null;
+
+    if (showNA) {
+      const cfg = NA[outcome];
+      nap.classList.add('visible');
+      nap.style.borderColor = cfg.border;
+      nap.style.background  = cfg.bg;
+      nap.querySelector('.na-lbl').style.color = cfg.labelColor;
+      document.getElementById('na-heading').textContent = cfg.heading;
+      const ntEl = document.getElementById('na-text');
+      ntEl.textContent = cfg.text;
+      ntEl.style.color  = cfg.textColor;
+    } else {
+      nap.classList.remove('visible');
+      nap.style.borderColor = '#e5e7eb';
+      nap.style.background  = '#ffffff';
+    }
+
+    document.getElementById('sc').textContent  = `Stage ${current + 1} of ${STAGES.length}`;
+    document.getElementById('nlbl').textContent = STAGES[current].name;
+    document.getElementById('bprev').disabled   = current === 0;
+    document.getElementById('bnext').disabled   = current === STAGES.length - 1;
+  }
+
+  function applyLayout() {
+    document.getElementById('pw').classList.toggle('is-mobile', document.getElementById('pw').offsetWidth < 480);
+  }
+
+  document.getElementById('bprev').addEventListener('click', () => {
+    if (current > 0) { current--; outcome = null; render(); }
+  });
+  document.getElementById('bnext').addEventListener('click', () => {
+    if (current < STAGES.length - 1) { current++; render(); }
+  });
+
+  buildTimeline();
+  requestAnimationFrame(() => requestAnimationFrame(render));
+  window.addEventListener('resize', () => { applyLayout(); render(); });
+  applyLayout();
+</script>
+</body>
+</html>
