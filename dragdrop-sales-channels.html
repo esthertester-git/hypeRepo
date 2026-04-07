@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<!--
+  Sales Channels — Drag & Drop — Disco UI
+  Recommended iframe size: 660 × 600 px
+  File name: dragdrop-sales-channels.html
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Channels — Drag &amp; Drop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #ffffff;
+      color: #111827;
+      min-height: unset;
+      align-items: flex-start;
+    }
+
+    #dnd-wrap {
+      max-width: 660px;
+      margin: 0 auto;
+      padding: 20px 16px 28px;
+    }
+
+    /* ── Instruction ───────────────────────────────────── */
+    .instruction {
+      font-size: 11px; font-weight: 600; letter-spacing: .07em;
+      text-transform: uppercase; color: #9ca3af;
+      text-align: center; margin-bottom: 16px;
+    }
+
+    /* ── Chip bank ─────────────────────────────────────── */
+    .bank {
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+      padding: 14px 16px;
+      background: #f9fafb;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      min-height: 56px;
+      transition: border-color .2s, background .2s;
+    }
+    .bank.over { border-color: #2563eb; background: #eff6ff; }
+    .bank-empty {
+      font-size: 13px; color: #9ca3af;
+      align-self: center; width: 100%; text-align: center;
+      pointer-events: none;
+    }
+
+    /* ── Chips ─────────────────────────────────────────── */
+    .chip {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 8px 18px; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+      background: #2563eb; color: #ffffff;
+      cursor: grab; user-select: none;
+      border: none; outline: none;
+      transition: opacity .15s, transform .15s, background .2s, box-shadow .15s;
+    }
+    .chip:active { cursor: grabbing; transform: scale(.97); }
+    .chip.dragging { opacity: .35; }
+    .chip.selected { box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #2563eb; }
+    .chip.correct  { background: #16a34a; }
+    .chip.incorrect{ background: #dc2626; }
+    .chip.disabled { cursor: default; pointer-events: none; }
+
+    /* ── Scenario rows ─────────────────────────────────── */
+    .scenario-row {
+      display: flex; align-items: stretch; gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .scenario-card {
+      flex: 1;
+      background: #ffffff;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 13px 16px;
+      font-size: 14px; font-weight: 400; color: #374151; line-height: 1.6;
+      transition: border-color .25s, background .25s;
+    }
+    .scenario-card.correct  { border-color: #86efac; background: #f0fdf4; }
+    .scenario-card.incorrect{ border-color: #fca5a5; background: #fff1f2; }
+
+    .feedback-tag {
+      display: block; margin-top: 8px;
+      font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    }
+    .feedback-tag.correct-tag  { color: #16a34a; }
+    .feedback-tag.incorrect-tag{ color: #dc2626; }
+    .correct-label {
+      display: block; margin-top: 3px;
+      font-size: 12px; color: #6b7280;
+    }
+
+    /* ── Drop zones ────────────────────────────────────── */
+    .drop-zone {
+      width: 120px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      background: #f9fafb;
+      transition: border-color .2s, background .2s;
+      cursor: pointer;
+      min-height: 56px;
+    }
+    .drop-zone.over     { border-color: #2563eb; background: #eff6ff; }
+    .drop-zone.filled   { border-style: solid; border-color: #e5e7eb; background: #ffffff; cursor: default; }
+    .drop-zone.correct  { border-color: #86efac; background: #f0fdf4; }
+    .drop-zone.incorrect{ border-color: #fca5a5; background: #fff1f2; }
+    .drop-zone-hint {
+      font-size: 11px; color: #d1d5db; text-align: center;
+      font-weight: 500; pointer-events: none;
+    }
+
+    /* ── Bottom bar ────────────────────────────────────── */
+    .bottom-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 16px;
+    }
+
+    .score-pill {
+      font-size: 13px; font-weight: 600;
+      padding: 7px 16px; border-radius: 50px;
+      background: #f3f4f6; color: #374151;
+    }
+    .score-pill.all-correct{ background: #dcfce7; color: #16a34a; }
+    .score-pill.partial    { background: #fef9c3; color: #854d0e; }
+
+    .btn-check {
+      padding: 9px 22px; border-radius: 50px;
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+      background: #2563eb; color: #ffffff;
+      border: none; cursor: pointer;
+      transition: background .2s, opacity .2s;
+    }
+    .btn-check:disabled { opacity: .35; cursor: default; }
+    .btn-check:hover:not(:disabled){ background: #1d4ed8; }
+
+    .btn-reset {
+      padding: 9px 22px; border-radius: 50px;
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+      background: #ffffff; color: #374151;
+      border: 1.5px solid #e5e7eb; cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-reset:hover{ border-color: #2563eb; color: #2563eb; }
+
+    /* ── Mobile ────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .drop-zone { width: 90px; }
+      .chip      { padding: 7px 12px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">
+  Drag each sales channel to the customer profile that best fits it
+</h2>
+
+<div id="dnd-wrap">
+  <div class="instruction">Drag each channel to the matching customer profile</div>
+  <div class="bank" id="bank"></div>
+  <div id="rows"></div>
+  <div class="bottom-bar">
+    <div id="score-area"></div>
+    <div style="display:flex;gap:8px;" id="btn-area"></div>
+  </div>
+</div>
+
+<script>
+  const CHIPS = [
+    { id: 'outbound',  label: 'Outbound'  },
+    { id: 'inbound',   label: 'Inbound'   },
+    { id: 'referral',  label: 'Referral'  },
+    { id: 'community', label: 'Community' }
+  ];
+
+  const SCENARIOS = [
+    { id: 0, text: 'Your ICP is easy to identify and contact directly.',                                           answer: 'outbound'  },
+    { id: 1, text: 'Your ICP searches for solutions online.',                                                      answer: 'inbound'   },
+    { id: 2, text: 'You already have happy customers who know others like themselves.',                            answer: 'referral'  },
+    { id: 3, text: 'There is an industry community, conference, or online group where your ICP gathers.',         answer: 'community' }
+  ];
+
+  function shuffle(arr) { return [...arr].sort(() => Math.random() - .5); }
+  function chipLabel(id) { return CHIPS.find(c => c.id === id).label; }
+  function inBank(id)    { return !Object.values(placed).includes(id); }
+  function zoneOf(id)    {
+    for (const k in placed) { if (placed[k] === id) return Number(k); }
+    return null;
+  }
+
+  let placed    = { 0: null, 1: null, 2: null, 3: null };
+  let checked   = false;
+  let selected  = null;
+  let dragChipId   = null;
+  let dragFromZone = null;
+  let bankOrder = shuffle(CHIPS.map(c => c.id));
+
+  /* ── Chip element factory ─────────────────────────────── */
+  function makeChip(id, fromZone) {
+    const el = document.createElement('div');
+    el.className = 'chip' + (selected === id ? ' selected' : '') + (checked ? ' disabled' : '');
+    el.textContent = chipLabel(id);
+    el.dataset.id  = id;
+
+    if (checked) {
+      const zone = zoneOf(id);
+      if (zone !== null) {
+        el.classList.add(SCENARIOS[zone].answer === id ? 'correct' : 'incorrect');
+      }
+    }
+
+    if (!checked) {
+      el.draggable = true;
+
+      el.addEventListener('dragstart', e => {
+        dragChipId   = id;
+        dragFromZone = fromZone;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', id);
+        setTimeout(() => el.classList.add('dragging'), 0);
+      });
+      el.addEventListener('dragend', () => {
+        el.classList.remove('dragging');
+        dragChipId = null; dragFromZone = null;
+      });
+      el.addEventListener('click', () => handleChipClick(id, fromZone));
+    }
+    return el;
+  }
+
+  /* ── Render ───────────────────────────────────────────── */
+  function render() { renderBank(); renderRows(); renderBottom(); }
+
+  function renderBank() {
+    const bank      = document.getElementById('bank');
+    bank.innerHTML  = '';
+    const bankChips = bankOrder.filter(id => inBank(id));
+
+    if (bankChips.length === 0) {
+      bank.innerHTML = '<span class="bank-empty">All channels placed</span>';
+      return;
+    }
+    bankChips.forEach(id => bank.appendChild(makeChip(id, null)));
+  }
+
+  function renderRows() {
+    const rows    = document.getElementById('rows');
+    rows.innerHTML = '';
+
+    SCENARIOS.forEach((s, i) => {
+      const row = document.createElement('div');
+      row.className = 'scenario-row';
+
+      /* Scenario card */
+      const card = document.createElement('div');
+      card.className = 'scenario-card';
+      card.textContent = s.text;
+
+      if (checked && placed[i] !== null) {
+        const correct = placed[i] === s.answer;
+        card.classList.add(correct ? 'correct' : 'incorrect');
+        const tag = document.createElement('span');
+        tag.className   = 'feedback-tag ' + (correct ? 'correct-tag' : 'incorrect-tag');
+        tag.textContent = correct ? 'Correct' : 'Incorrect';
+        card.appendChild(tag);
+        if (!correct) {
+          const cl = document.createElement('span');
+          cl.className   = 'correct-label';
+          cl.textContent = 'The right channel: ' + chipLabel(s.answer);
+          card.appendChild(cl);
+        }
+      }
+
+      /* Drop zone */
+      const zone = document.createElement('div');
+      zone.className = 'drop-zone' + (placed[i] ? ' filled' : '');
+      zone.id = 'zone-' + i;
+
+      if (checked && placed[i]) {
+        zone.classList.add(placed[i] === s.answer ? 'correct' : 'incorrect');
+      }
+
+      if (placed[i]) {
+        zone.appendChild(makeChip(placed[i], i));
+      } else {
+        const hint = document.createElement('div');
+        hint.className   = 'drop-zone-hint';
+        hint.textContent = 'Drop here';
+        zone.appendChild(hint);
+      }
+
+      if (!checked) {
+        zone.addEventListener('dragover', e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          zone.classList.add('over');
+        });
+        zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+        zone.addEventListener('drop', e => {
+          e.preventDefault();
+          zone.classList.remove('over');
+          handleDrop(i);
+        });
+        zone.addEventListener('click', () => handleZoneClick(i));
+      }
+
+      row.append(card, zone);
+      rows.appendChild(row);
+    });
+  }
+
+  function renderBottom() {
+    const scoreArea = document.getElementById('score-area');
+    const btnArea   = document.getElementById('btn-area');
+    scoreArea.innerHTML = '';
+    btnArea.innerHTML   = '';
+
+    const allFilled = Object.values(placed).every(v => v !== null);
+
+    if (checked) {
+      const score = SCENARIOS.filter((s, i) => placed[i] === s.answer).length;
+      const pill  = document.createElement('div');
+      pill.className   = 'score-pill' + (score === 4 ? ' all-correct' : ' partial');
+      pill.textContent = score + ' / 4 correct';
+      scoreArea.appendChild(pill);
+
+      const rb = document.createElement('button');
+      rb.className   = 'btn-reset';
+      rb.textContent = 'Try again';
+      rb.addEventListener('click', reset);
+      btnArea.appendChild(rb);
+    } else {
+      const cb = document.createElement('button');
+      cb.className   = 'btn-check';
+      cb.textContent = 'Check answers';
+      cb.disabled    = !allFilled;
+      cb.addEventListener('click', check);
+      btnArea.appendChild(cb);
+    }
+  }
+
+  /* ── Interaction handlers ─────────────────────────────── */
+  function handleDrop(zoneIndex) {
+    if (!dragChipId) return;
+    const existing = placed[zoneIndex];
+    if (dragFromZone !== null) placed[dragFromZone] = null;
+    if (existing && dragFromZone !== null) placed[dragFromZone] = existing;
+    placed[zoneIndex] = dragChipId;
+    selected = null; dragChipId = null; dragFromZone = null;
+    render();
+  }
+
+  function handleChipClick(id, fromZone) {
+    if (selected === id) { selected = null; render(); return; }
+    selected = id;
+    render();
+  }
+
+  function handleZoneClick(zoneIndex) {
+    if (selected) {
+      const existing  = placed[zoneIndex];
+      const fromZone  = zoneOf(selected);
+      if (fromZone !== null) placed[fromZone] = null;
+      if (existing && fromZone !== null) placed[fromZone] = existing;
+      placed[zoneIndex] = selected;
+      selected = null;
+      render();
+    } else if (placed[zoneIndex]) {
+      selected = placed[zoneIndex];
+      render();
+    }
+  }
+
+  /* ── Bank drop target ─────────────────────────────────── */
+  const bankEl = document.getElementById('bank');
+  bankEl.addEventListener('dragover', e => {
+    e.preventDefault();
+    bankEl.classList.add('over');
+  });
+  bankEl.addEventListener('dragleave', () => bankEl.classList.remove('over'));
+  bankEl.addEventListener('drop', e => {
+    e.preventDefault();
+    bankEl.classList.remove('over');
+    if (dragChipId && dragFromZone !== null) {
+      placed[dragFromZone] = null;
+      dragChipId = null; dragFromZone = null;
+      render();
+    }
+  });
+
+  function check() { checked = true; selected = null; render(); }
+
+  function reset() {
+    placed    = { 0: null, 1: null, 2: null, 3: null };
+    checked   = false;
+    selected  = null;
+    bankOrder = shuffle(CHIPS.map(c => c.id));
+    render();
+  }
+
+  render();
+</script>
+</body>
+</html>
