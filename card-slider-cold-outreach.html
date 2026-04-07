@@ -437,7 +437,7 @@
       maxH = Math.max(maxH, clone.offsetHeight);
       document.body.removeChild(clone);
     });
-    scene.style.height = Math.max(maxH, 200) + 'px';
+    scene.style.height = Math.max(maxH, 200) + 24 + 'px';
   }
 
   function notifyHeight() {
@@ -448,7 +448,10 @@
   applyLayout();
   setSceneHeight();
   notifyHeight();
-  document.fonts.ready.then(() => { setSceneHeight(); notifyHeight(); });
+  document.fonts.ready.then(() => {
+    setSceneHeight(); notifyHeight();
+    setTimeout(() => { setSceneHeight(); notifyHeight(); }, 350);
+  });
   window.addEventListener('resize', () => { applyLayout(); setSceneHeight(); notifyHeight(); });
 
   // ── Navigation ───────────────────────────────────────────────
