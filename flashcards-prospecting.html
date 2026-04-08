@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ways to Find Prospects</title>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  FLASH CARDS — WAYS TO FIND PROSPECTS                       ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  EMBEDDING IN AN IFRAME
+    <iframe src="flashcards-prospecting.html" width="100%" height="520"
+            frameborder="0" allowtransparency="true"></iframe>
+
+  MOBILE SWIPE
+  Swipe left/right on the card to navigate. Enabled automatically.
+
+  EDITING CONTENT
+  Each card has a .card-front and .card-back div. Edit the text
+  inside those. Each face has its own flip button.
+
+  ADDING MORE CARDS
+  1. Copy a <div class="card"> block, give it id="card-5" etc.
+  2. Update both flip buttons: onclick="flipCard('card-5')"
+  3. Update: const totalCards = 5;
+  4. Add: <div class="dot" id="dot-4"></div>
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #fff;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: unset;
+    padding: 24px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  /* ── Counter ──────────────────────────────────────────── */
+  .card-counter {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #9ca3af;
+  }
+
+  /* ── Desktop layout: arrows flank the scene ──────────── */
+  .nav-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .scene {
+    flex: 1;
+    perspective: 1000px;
+    min-width: 0;
+  }
+
+  .nav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid #e5e7eb;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #374151;
+    transition: border-color 0.15s, color 0.15s, transform 0.15s;
+  }
+
+  .nav-btn:hover:not(:disabled) { border-color: #2563eb; color: #2563eb; transform: scale(1.06); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+  /* ── Mobile top-nav: arrows flank the counter ────────── */
+  .mobile-nav {
+    display: none;
+    width: 100%;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mobile-nav .nav-btn { width: 36px; height: 36px; }
+
+  .mobile-counter {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #9ca3af;
+  }
+
+  @media (max-width: 540px) {
+    body { padding: 16px; }
+    .card-counter { display: none; }
+    .nav-row > .nav-btn { display: none; }
+    .mobile-nav { display: flex; }
+    .scene { width: 100%; }
+    .card-title { font-size: 17px !important; }
+  }
+
+  /* ── Card ─────────────────────────────────────────────── */
+  .card {
+    width: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    display: none;
+  }
+
+  .card.active  { display: block; }
+  .card.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    border-radius: 16px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    padding: 28px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .card-front {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.08);
+  }
+
+  .card-back {
+    background: #2563eb;
+    transform: rotateY(180deg);
+    box-shadow: 0 1px 3px rgba(37,99,235,0.2), 0 8px 24px rgba(37,99,235,0.35);
+  }
+
+  /* ── Text ─────────────────────────────────────────────── */
+  .card-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 2px;
+  }
+
+  .card-back .card-label {
+    color: rgba(255,255,255,0.55);
+  }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.3;
+    color: #111827;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid #e5e7eb;
+    margin-bottom: 2px;
+  }
+
+  .card-back .card-title {
+    color: #fff;
+    border-bottom-color: rgba(255,255,255,0.2);
+  }
+
+  .card-body {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #6b7280;
+  }
+
+  .card-back .card-body { color: rgba(255,255,255,0.88); }
+
+  /* ── Good-fit list on card back ───────────────────────── */
+  .fit-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-top: 4px;
+  }
+
+  .fit-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .fit-list li {
+    font-size: 14px;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.92);
+    padding-left: 20px;
+    position: relative;
+  }
+
+  .fit-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.45);
+    flex-shrink: 0;
+  }
+
+  /* ── Flip button ──────────────────────────────────────── */
+  .flip-btn-wrap {
+    margin-top: auto;
+    padding-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .flip-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 8px 18px;
+    color: #374151;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+
+  .flip-btn:hover { background: #eff6ff; border-color: #2563eb; color: #2563eb; }
+
+  .card-back .flip-btn {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.3);
+    color: #fff;
+  }
+
+  .card-back .flip-btn:hover { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.5); }
+
+  /* ── Progress dots ────────────────────────────────────── */
+  .dots {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #d1d5db;
+    transition: background 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+
+  .dot.active { background: #2563eb; transform: scale(1.4); }
+
+  /* ── Swipe hint ───────────────────────────────────────── */
+  .swipe-hint {
+    font-size: 11px;
+    color: #9ca3af;
+    transition: opacity 0.5s;
+  }
+
+  .swipe-hint.hidden { opacity: 0; pointer-events: none; }
+
+  @media (min-width: 541px) { .swipe-hint { display: none; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Desktop counter -->
+  <div class="card-counter">Card <span id="current-num">1</span> of 4</div>
+
+  <!-- Mobile top bar -->
+  <div class="mobile-nav">
+    <button class="nav-btn" id="prev-btn-m" disabled aria-label="Previous">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12.5L5.5 8L10 3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <span class="mobile-counter">Card <span id="current-num-m">1</span> of 4</span>
+    <button class="nav-btn" id="next-btn-m" aria-label="Next">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <!-- Desktop nav row -->
+  <div class="nav-row">
+
+    <button class="nav-btn" id="prev-btn" disabled aria-label="Previous">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12.5L5.5 8L10 3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+    <div class="scene" id="scene">
+
+      <!-- Card 1: Outbound -->
+      <div class="card active" id="card-1">
+        <div class="card-face card-front">
+          <p class="card-label">Prospecting approach 1 of 4</p>
+          <h2 class="card-title">Outbound Prospecting</h2>
+          <p class="card-body">Outbound prospecting means initiating contact with potential customers who have not previously expressed interest in your product. Common outbound tactics include cold email, LinkedIn outreach, phone calls, and direct mail.</p>
+          <p class="card-body">Outbound works best when you have a tightly defined ICP, because precision is what makes cold outreach feel relevant rather than random. A message sent to exactly the right person at exactly the right time is not cold at all.</p>
+          <div class="flip-btn-wrap"><button class="flip-btn" onclick="flipCard('card-1')"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 4.5C2.8 2.5 4.75 1 7 1C9.76 1 12 3.24 12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 9.5C11.2 11.5 9.25 13 7 13C4.24 13 2 10.76 2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 4.5L12.5 4.5L12.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9.5L1.5 9.5L1.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        </div>
+        <div class="card-face card-back">
+          <p class="card-label">Prospecting approach 1 of 4</p>
+          <h2 class="card-title">Outbound Prospecting</h2>
+          <p class="fit-label">Outbound is a good fit when...</p>
+          <ul class="fit-list">
+            <li>Your ICP is specific and identifiable (for example, operations managers at manufacturing companies with 50–200 employees)</li>
+            <li>You can personalise your message based on what you know about the prospect</li>
+            <li>You are willing to follow up consistently and professionally</li>
+          </ul>
+          <div class="flip-btn-wrap"><button class="flip-btn" onclick="flipCard('card-1')"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 4.5C2.8 2.5 4.75 1 7 1C9.76 1 12 3.24 12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 9.5C11.2 11.5 9.25 13 7 13C4.24 13 2 10.76 2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 4.5L12.5 4.5L12.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9.5L1.5 9.5L1.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        </div>
+      </div>
+
+      <!-- Card 2: Inbound -->
+      <div class="card" id="card-2">
+        <div class="card-face card-front">
+          <p class="card-label">Prospecting approach 2 of 4</p>
+          <h2 class="card-title">Inbound Prospecting</h2>
+          <p class="card-body">Inbound prospecting means attracting prospects who come to you, usually through content, search, or your online presence. Blog posts, webinars, social media content, and search engine optimisation (SEO) are common inbound tools.</p>
+          <p class="card-body">Inbound generates warmer leads because prospects have already shown interest. The trade-off is that inbound takes time to build. It is not a short-term tactic.</p>
+          <div class="flip-btn-wrap"><button class="flip-btn" onclick="flipCard('card-2')"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 4.5C2.8 2.5 4.75 1 7 1C9.76 1 12 3.24 12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 9.5C11.2 11.5 9.25 13 7 13C4.24 13 2 10.76 2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 4.5L12.5 4.5L12.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9.5L1.5 9.5L1.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        </div>
+        <div class="card-face card-back">
+          <p class="card-label">Prospecting approach 2 of 4</p>
+          <h2 class="card-title">Inbound Prospecting</h2>
+          <p class="fit-label">Inbound is a good fit when...</p>
+          <ul class="fit-list">
+            <li>You can commit to creating consistent, useful content over time</li>
+            <li>Your ICP actively searches for solutions online</li>
+            <li>You want to reduce cost per lead over the long term</li>
+          </ul>
+          <div class="flip-btn-wrap"><button class="flip-btn" onclick="flipCard('card-2')"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 4.5C2.8 2.5 4.75 1 7 1C9.76 1 12 3.24 12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 9.5C11.2 11.5 9.25 13 7 13C4.24 13 2 10.76 2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 4.5L12.5 4.5L12.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9.5L1.5 9.5L1.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        </div>
+      </div>
+
+      <!-- Card 3: Referral -->
+      <div class="card" id="card-3">
+        <div class="card-face card-front">
+          <p class="card-label">Prospecting approach 3 of 4</p>
+          <h2 class="card-title">Referral Prospecting</h2>
+          <p class="card-body">Referral prospecting means leveraging your existing network and happy customers to generate introductions. A referral from a trusted source dramatically shortens the sales cycle because trust is already established.</p>
+          <p class="card-body">Most founders underestimate how much prospecting they can do through referrals, and overestimate how uncomfortable it is to ask. If you have delivered real value to a customer, asking for an introduction is not a burden. It is an opportunity for them to help someone they know.</p>
+          <div class="flip-btn-wrap"><button class="flip-btn" onclick="flipCard('card-3')"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 4.5C2.8 2.5 4.75 1 7 1C9.76 1 12 3.24 12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 9.5C11.2 11.5 9.25 13 7 13C4.24 13 2 10.76 2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 4.5L12.5 4.5L12.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9.5L1.5 9.5L1.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        </div>
+        <div class="card-face card-back">
+          <p class="card-label">Prospecting approach 3 of 4</p>
+          <h2 class="card-title">Referral Prospecting</h2>
+          <p class="fit-label">Referral is a good fit when...</p>
+          <ul class="fit-list">
+            <li>You have customers who are genuinely satisfied with what you do</li>
+            <li>Your network overlaps with your ICP</li>
+            <li>You are willing to ask directly rather than hinting</li>
+          </ul>
+          <div class="flip-btn-wrap"><button class="flip-btn" onclick="flipCard('card-3')"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 4.5C2.8 2.5 4.75 1 7 1C9.76 1 12 3.24 12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 9.5C11.2 11.5 9.25 13 7 13C4.24 13 2 10.76 2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 4.5L12.5 4.5L12.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9.5L1.5 9.5L1.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        </div>
+      </div>
+
+      <!-- Card 4: Community -->
+      <div class="card" id="card-4">
+        <div class="card-face card-front">
+          <p class="card-label">Prospecting approach 4 of 4</p>
+          <h2 class="card-title">Community Prospecting</h2>
+          <p class="card-body">Community prospecting means building relationships through professional networks, industry events, online forums, Slack groups, trade associations, and startup ecosystems. Atlantic Canada has a strong and well-connected entrepreneurial community. This is an asset worth using.</p>
+          <p class="card-body">Community prospecting is slower than outbound but generates high-quality relationships. People buy from those they know and trust, and community is where that trust is built over time.</p>
+          <div class="flip-btn-wrap"><button class="flip-btn" onclick="flipCard('card-4')"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 4.5C2.8 2.5 4.75 1 7 1C9.76 1 12 3.24 12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 9.5C11.2 11.5 9.25 13 7 13C4.24 13 2 10.76 2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 4.5L12.5 4.5L12.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9.5L1.5 9.5L1.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        </div>
+        <div class="card-face card-back">
+          <p class="card-label">Prospecting approach 4 of 4</p>
+          <h2 class="card-title">Community Prospecting</h2>
+          <p class="fit-label">Community is a good fit when...</p>
+          <ul class="fit-list">
+            <li>Your ICP participates in identifiable professional communities</li>
+            <li>You can contribute value before asking for anything in return</li>
+            <li>You are playing a long game alongside shorter-term outbound tactics</li>
+          </ul>
+          <div class="flip-btn-wrap"><button class="flip-btn" onclick="flipCard('card-4')"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 4.5C2.8 2.5 4.75 1 7 1C9.76 1 12 3.24 12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 9.5C11.2 11.5 9.25 13 7 13C4.24 13 2 10.76 2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 4.5L12.5 4.5L12.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9.5L1.5 9.5L1.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        </div>
+      </div>
+
+    </div><!-- end scene -->
+
+    <button class="nav-btn" id="next-btn" aria-label="Next">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+  </div><!-- end nav-row -->
+
+  <div class="dots">
+    <div class="dot active" id="dot-0"></div>
+    <div class="dot" id="dot-1"></div>
+    <div class="dot" id="dot-2"></div>
+    <div class="dot" id="dot-3"></div>
+  </div>
+
+  <div class="swipe-hint" id="swipe-hint">Swipe left or right to navigate</div>
+
+</div>
+<script>
+  const totalCards = 4;
+  let currentIndex = 0;
+  let isFlipping   = false;
+
+  // ── Dynamic card height via off-screen clone measurement ──
+  function setCardHeights() {
+    const sceneW = document.getElementById('scene').offsetWidth;
+    if (!sceneW) return;
+
+    let tallest = 0;
+
+    document.querySelectorAll('.card').forEach(card => {
+      let maxH = 0;
+      card.querySelectorAll('.card-face').forEach(face => {
+        const clone = face.cloneNode(true);
+        clone.style.cssText = [
+          'position:fixed',
+          'top:-9999px',
+          'left:0',
+          'width:' + sceneW + 'px',
+          'height:auto',
+          'min-height:0',
+          'transform:none',
+          'visibility:hidden',
+          'backface-visibility:visible',
+          '-webkit-backface-visibility:visible'
+        ].join(';');
+        document.body.appendChild(clone);
+        maxH = Math.max(maxH, clone.offsetHeight);
+        document.body.removeChild(clone);
+      });
+      const cardH = Math.max(maxH + 16, 240);
+      card.style.height = cardH + 'px';
+      tallest = Math.max(tallest, cardH);
+    });
+
+    if (window.innerWidth > 540) {
+      document.getElementById('scene').style.height = tallest + 'px';
+    } else {
+      document.getElementById('scene').style.height = '';
+    }
+  }
+
+  setCardHeights();
+  document.fonts.ready.then(setCardHeights);
+  window.addEventListener('resize', setCardHeights);
+
+  // ── Flip ────────────────────────────────────────────────
+  function flipCard(cardId) {
+    if (isFlipping) return;
+    isFlipping = true;
+    document.getElementById(cardId).classList.toggle('flipped');
+    setTimeout(() => { isFlipping = false; }, 600);
+  }
+
+  // ── Navigate ────────────────────────────────────────────
+  function goToCard(index) {
+    document.querySelectorAll('.card')[currentIndex].classList.remove('active','flipped');
+    currentIndex = index;
+    document.querySelectorAll('.card')[currentIndex].classList.add('active');
+    document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('active', i === currentIndex));
+
+    const n = currentIndex + 1;
+    document.getElementById('current-num').textContent   = n;
+    document.getElementById('current-num-m').textContent = n;
+
+    ['prev-btn','prev-btn-m'].forEach(id =>
+      document.getElementById(id).disabled = currentIndex === 0);
+    ['next-btn','next-btn-m'].forEach(id =>
+      document.getElementById(id).disabled = currentIndex === totalCards - 1);
+  }
+
+  document.getElementById('prev-btn').addEventListener('click',   () => { if (currentIndex > 0)              goToCard(currentIndex - 1); });
+  document.getElementById('next-btn').addEventListener('click',   () => { if (currentIndex < totalCards - 1) goToCard(currentIndex + 1); });
+  document.getElementById('prev-btn-m').addEventListener('click', () => { if (currentIndex > 0)              goToCard(currentIndex - 1); });
+  document.getElementById('next-btn-m').addEventListener('click', () => { if (currentIndex < totalCards - 1) goToCard(currentIndex + 1); });
+
+  // ── Swipe ────────────────────────────────────────────────
+  let touchStartX = 0, touchStartY = 0;
+  const scene = document.getElementById('scene');
+
+  scene.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  scene.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
+    document.getElementById('swipe-hint').classList.add('hidden');
+    if (dx < 0 && currentIndex < totalCards - 1) goToCard(currentIndex + 1);
+    if (dx > 0 && currentIndex > 0)              goToCard(currentIndex - 1);
+  }, { passive: true });
+</script>
+</body>
+</html>
