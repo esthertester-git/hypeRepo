@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reading Your Sprint Results</title>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  ACCORDION — READING YOUR SPRINT RESULTS — DISCO UI          ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  EMBEDDING IN AN IFRAME
+    <iframe src="accordion-sprint-results.html" width="100%" height="520"
+            frameborder="0" allowtransparency="true"></iframe>
+
+  EDITING CONTENT
+  Each .accordion-item contains a .accordion-header and .accordion-body.
+  Edit heading text inside .accordion-heading and body copy inside
+  .accordion-content.
+
+  ADDING MORE ITEMS
+  Copy any .accordion-item block and update the onclick handler index.
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: unset;
+    padding: 28px 20px 36px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 620px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* ── Accordion item shell ─────────────────────────────── */
+  .accordion-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    overflow: hidden;
+    transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .accordion-item.open {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06);
+    border-color: #d1d5db;
+  }
+
+  /* ── Header / trigger ────────────────────────────────── */
+  .accordion-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ── Icon circle ─────────────────────────────────────── */
+  .icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid #e5e7eb;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .icon-circle svg {
+    width: 18px;
+    height: 18px;
+    fill: #6b7280;
+    display: block;
+    transition: fill 0.25s;
+  }
+
+  .accordion-item.open .icon-circle {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+  }
+
+  .accordion-item.open .icon-circle svg {
+    fill: #2563eb;
+  }
+
+  /* ── Heading text ────────────────────────────────────── */
+  .accordion-heading {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.4;
+  }
+
+  /* ── Chevron button ──────────────────────────────────── */
+  .chevron-wrap {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid #e5e7eb;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.25s, border-color 0.25s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .chevron-wrap svg {
+    color: #6b7280;
+    transition: color 0.25s;
+  }
+
+  .accordion-item.open .chevron-wrap {
+    background: #2563eb;
+    border-color: #2563eb;
+    transform: rotate(180deg);
+  }
+
+  .accordion-item.open .chevron-wrap svg {
+    color: #ffffff;
+  }
+
+  /* ── Body / content panel ───────────────────────────── */
+  .accordion-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .accordion-item.open .accordion-body {
+    grid-template-rows: 1fr;
+  }
+
+  .accordion-body-inner {
+    overflow: hidden;
+  }
+
+  .accordion-content {
+    padding: 0 18px 20px 72px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #6b7280;
+  }
+
+  .accordion-content p + p {
+    margin-top: 10px;
+  }
+
+  /* ── Mobile ─────────────────────────────────────────── */
+  .container.is-mobile .accordion-content {
+    padding-left: 18px;
+  }
+</style>
+</head>
+<body>
+<div class="container" id="container">
+
+  <!-- Item 1: Confirmed -->
+  <div class="accordion-item open" id="item-0">
+    <div class="accordion-header" onclick="toggleItem(0)">
+      <div class="icon-circle">
+        <!-- Checkmark -->
+        <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+        </svg>
+      </div>
+      <span class="accordion-heading">Results confirmed your hypothesis</span>
+      <div class="chevron-wrap">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div class="accordion-body">
+      <div class="accordion-body-inner">
+        <div class="accordion-content">
+          <p>Something worked as expected. This is useful, but it raises a new question. A confirmed hypothesis tells you that a tactic has merit. It does not yet tell you whether it will work consistently, or whether it holds for different segments of your ICP.</p>
+          <p>Sprint 2 can build on this finding: try the same approach with a larger or slightly different sample, or test a second variable now that the first is established.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Item 2: Not confirmed -->
+  <div class="accordion-item" id="item-1">
+    <div class="accordion-header" onclick="toggleItem(1)">
+      <div class="icon-circle">
+        <!-- X mark -->
+        <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"/>
+        </svg>
+      </div>
+      <span class="accordion-heading">Results did not confirm your hypothesis</span>
+      <div class="chevron-wrap">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div class="accordion-body">
+      <div class="accordion-body-inner">
+        <div class="accordion-content">
+          <p>Something did not work as expected. This is equally useful. The next step is to understand why. Did the channel not reach your ICP? Did conversations stall at a specific point? Did prospects respond but not move forward? Each of these points to a different Sprint 2 focus.</p>
+          <p>Do not set aside a hypothesis just because it was not confirmed. Look closely at where it broke down.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Item 3: Inconclusive -->
+  <div class="accordion-item" id="item-2">
+    <div class="accordion-header" onclick="toggleItem(2)">
+      <div class="icon-circle">
+        <!-- Question mark -->
+        <svg viewBox="0 0 122.88 122.88" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M122.88,61.44C122.88,27.51,95.37,0,61.44,0C27.51,0,0,27.51,0,61.44c0,33.93,27.51,61.44,61.44,61.44 C95.37,122.88,122.88,95.37,122.88,61.44L122.88,61.44z M68.79,74.58H51.3v-1.75c0-2.97,0.32-5.39,1-7.25 c0.68-1.87,1.68-3.55,3.01-5.1c1.34-1.54,4.35-4.23,9.01-8.11c2.48-2.03,3.73-3.88,3.73-5.56c0-1.71-0.51-3.01-1.5-3.95 c-1-0.93-2.51-1.4-4.54-1.4c-2.19,0-3.98,0.73-5.4,2.16c-1.43,1.44-2.34,3.97-2.74,7.56l-17.88-2.22c0.61-6.57,3-11.86,7.15-15.85 c4.17-4.02,10.55-6.01,19.14-6.01c6.7,0,12.1,1.4,16.21,4.19c5.6,3.78,8.38,8.82,8.38,15.1c0,2.62-0.73,5.14-2.16,7.56 c-1.44,2.44-4.39,5.39-8.85,8.88c-3.09,2.48-5.05,4.44-5.86,5.93C69.19,70.24,68.79,72.19,68.79,74.58L68.79,74.58z M50.68,79.25 h18.76v16.53H50.68V79.25L50.68,79.25z"/>
+        </svg>
+      </div>
+      <span class="accordion-heading">Results were inconclusive</span>
+      <div class="chevron-wrap">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div class="accordion-body">
+      <div class="accordion-body-inner">
+        <div class="accordion-content">
+          <p>You did not generate enough interactions to draw a clear conclusion, or the results were too mixed to point in a clear direction. This is common in Sprint 1, especially for founders who are still building their pipeline.</p>
+          <p>In this case, Sprint 2 may involve running a cleaner version of the same test under better conditions, or narrowing the hypothesis to something more testable given your current pipeline.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+  const items = document.querySelectorAll('.accordion-item');
+
+  function toggleItem(index) {
+    const item = document.getElementById('item-' + index);
+    const isOpen = item.classList.contains('open');
+
+    items.forEach(el => el.classList.remove('open'));
+
+    if (!isOpen) {
+      item.classList.add('open');
+    }
+  }
+
+  const container = document.getElementById('container');
+  function applyLayout() {
+    container.classList.toggle('is-mobile', container.offsetWidth < 480);
+  }
+  window.addEventListener('resize', applyLayout);
+  applyLayout();
+</script>
+</body>
+</html>
