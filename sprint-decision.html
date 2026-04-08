@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>End of Sprint: Choose Your Path</title>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  SPRINT DECISION — DISCO UI                                  ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  EMBEDDING IN AN IFRAME
+    <iframe src="sprint-decision.html" width="100%" height="520"
+            frameborder="0" allowtransparency="true"></iframe>
+
+  EDITING CONTENT
+  Update the `data` object in the <script> block to change
+  labels, body copy, or "right when" text per path.
+  SVG icon paths are stored in the `svgi` object above it.
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: unset;
+    padding: 28px 20px 36px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 620px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* ── Display panel ───────────────────────────────────── */
+  .panel {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 28px;
+    min-height: 210px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.08);
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .panel.iter { background: #eff6ff; border-color: #bfdbfe; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(37,99,235,0.10); }
+  .panel.piv  { background: #fffbeb; border-color: #fde68a; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(180,120,0,0.10); }
+  .panel.exp  { background: #f0fdf4; border-color: #bbf7d0; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(22,101,52,0.08); }
+
+  .panel-default-text {
+    font-size: 15px;
+    line-height: 1.65;
+    color: #9ca3af;
+    max-width: 260px;
+  }
+
+  /* ── Panel content ───────────────────────────────────── */
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .panel-icon-ring {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .panel-icon-ring svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+  }
+
+  .panel-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .panel-title {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .panel-tagline {
+    font-size: 13px;
+    font-weight: 500;
+    font-style: italic;
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+
+  .panel-body {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #374151;
+    margin-bottom: 16px;
+  }
+
+  .panel-when {
+    border-left: 3px solid;
+    padding-left: 12px;
+    border-radius: 0;
+    width: 100%;
+  }
+
+  .panel-when-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .panel-when-text {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* ── Colour tokens per path ──────────────────────────── */
+  .iter .panel-icon-ring  { background: #bfdbfe; }
+  .iter .panel-icon-ring svg { fill: #1e3a8a; }
+  .iter .panel-eyebrow    { color: #2563eb; }
+  .iter .panel-title      { color: #1e3a8a; }
+  .iter .panel-tagline    { color: #2563eb; }
+  .iter .panel-when       { border-color: #bfdbfe; }
+  .iter .panel-when-label { color: #2563eb; }
+  .iter .panel-when-text  { color: #1e3a8a; }
+
+  .piv .panel-icon-ring   { background: #fde68a; }
+  .piv .panel-icon-ring svg { fill: #78350f; }
+  .piv .panel-eyebrow     { color: #b45309; }
+  .piv .panel-title       { color: #78350f; }
+  .piv .panel-tagline     { color: #b45309; }
+  .piv .panel-when        { border-color: #fde68a; }
+  .piv .panel-when-label  { color: #b45309; }
+  .piv .panel-when-text   { color: #78350f; }
+
+  .exp .panel-icon-ring   { background: #bbf7d0; }
+  .exp .panel-icon-ring svg { fill: #14532d; }
+  .exp .panel-eyebrow     { color: #16a34a; }
+  .exp .panel-title       { color: #14532d; }
+  .exp .panel-tagline     { color: #16a34a; }
+  .exp .panel-when        { border-color: #bbf7d0; }
+  .exp .panel-when-label  { color: #16a34a; }
+  .exp .panel-when-text   { color: #14532d; }
+
+  /* ── Selector buttons ────────────────────────────────── */
+  .btn-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .path-btn {
+    font-family: 'Inter', sans-serif;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 16px;
+    background: #ffffff;
+    padding: 16px 8px 14px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.15s;
+  }
+
+  .path-btn:hover:not(.active) {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+
+  .path-btn:active { transform: scale(0.97); }
+
+  .btn-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid #e5e7eb;
+    background: #f9fafb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .btn-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: #6b7280;
+    display: block;
+    transition: fill 0.2s;
+  }
+
+  .btn-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    transition: color 0.2s;
+  }
+
+  /* Active states */
+  .path-btn.active-iter { background: #eff6ff; border-color: #93c5fd; }
+  .path-btn.active-iter .btn-icon { background: #bfdbfe; border-color: #93c5fd; }
+  .path-btn.active-iter .btn-icon svg { fill: #1e3a8a; }
+  .path-btn.active-iter .btn-label { color: #1e3a8a; }
+
+  .path-btn.active-piv { background: #fffbeb; border-color: #fcd34d; }
+  .path-btn.active-piv .btn-icon { background: #fde68a; border-color: #fcd34d; }
+  .path-btn.active-piv .btn-icon svg { fill: #78350f; }
+  .path-btn.active-piv .btn-label { color: #78350f; }
+
+  .path-btn.active-exp { background: #f0fdf4; border-color: #86efac; }
+  .path-btn.active-exp .btn-icon { background: #bbf7d0; border-color: #86efac; }
+  .path-btn.active-exp .btn-icon svg { fill: #14532d; }
+  .path-btn.active-exp .btn-label { color: #14532d; }
+
+  /* ── Mobile ──────────────────────────────────────────── */
+  .container.is-mobile .panel { padding: 20px; }
+  .container.is-mobile .btn-label { font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="container" id="container">
+
+  <div class="panel" id="panel">
+    <p class="panel-default-text">Select a path below to see what it means for your next sprint.</p>
+  </div>
+
+  <div class="btn-row">
+
+    <button class="path-btn" id="btn-iter" onclick="go('iter')">
+      <div class="btn-icon">
+        <svg viewBox="0 0 118.04 122.88"><path d="M16.08,59.26A8,8,0,0,1,0,59.26a59,59,0,0,1,97.13-45V8a8,8,0,1,1,16.08,0V33.35a8,8,0,0,1-8,8L80.82,43.62a8,8,0,1,1-1.44-15.95l8-.73A43,43,0,0,0,16.08,59.26Zm22.77,19.6a8,8,0,0,1,1.44,16l-10.08.91A42.95,42.95,0,0,0,102,63.86a8,8,0,0,1,16.08,0A59,59,0,0,1,22.3,110v4.18a8,8,0,0,1-16.08,0V89.14h0a8,8,0,0,1,7.29-8l25.31-2.3Z"/></svg>
+      </div>
+      <span class="btn-label">Iterate</span>
+    </button>
+
+    <button class="path-btn" id="btn-piv" onclick="go('piv')">
+      <div class="btn-icon">
+        <svg viewBox="0 0 122.88 122.88"><path d="M61.44,0A61.46,61.46,0,1,1,18,18,61.21,61.21,0,0,1,61.44,0ZM77,57.42l-7.23,4.11a7.56,7.56,0,0,1-.25,1.57,8,8,0,0,1-9.75,5.63,8.19,8.19,0,0,1-1.58-.61l-7.66,4.36L81.43,95.23,77,57.42ZM46.55,65.88l7.37-4.19A7.86,7.86,0,0,1,54.16,59a8,8,0,0,1,9.75-5.63,8.28,8.28,0,0,1,2.55,1.2L73,50.82,42.14,28.07l4.41,37.81ZM95.36,27.52a48,48,0,1,0,14,33.92,47.82,47.82,0,0,0-14-33.92Z"/></svg>
+      </div>
+      <span class="btn-label">Pivot</span>
+    </button>
+
+    <button class="path-btn" id="btn-exp" onclick="go('exp')">
+      <div class="btn-icon">
+        <svg viewBox="0 0 122.879 119.799"><path d="M49.988,0h0.016v0.007C63.803,0.011,76.298,5.608,85.34,14.652c9.027,9.031,14.619,21.515,14.628,35.303h0.007v0.033v0.04h-0.007c-0.005,5.557-0.917,10.905-2.594,15.892c-0.281,0.837-0.575,1.641-0.877,2.409v0.007c-1.446,3.66-3.315,7.12-5.547,10.307l29.082,26.139l0.018,0.016l0.157,0.146l0.011,0.011c1.642,1.563,2.536,3.656,2.649,5.78c0.11,2.1-0.543,4.248-1.979,5.971l-0.011,0.016l-0.175,0.203l-0.035,0.035l-0.146,0.16l-0.016,0.021c-1.565,1.642-3.654,2.534-5.78,2.646c-2.097,0.111-4.247-0.54-5.971-1.978l-0.015-0.011l-0.204-0.175l-0.029-0.024L78.761,90.865c-0.88,0.62-1.778,1.209-2.687,1.765c-1.233,0.755-2.51,1.466-3.813,2.115c-6.699,3.342-14.269,5.222-22.272,5.222v0.007h-0.016v-0.007c-13.799-0.004-26.296-5.601-35.338-14.645C5.605,76.291,0.016,63.805,0.007,50.021H0v-0.033v-0.016h0.007c0.004-13.799,5.601-26.296,14.645-35.338C23.683,5.608,36.167,0.016,49.955,0.007V0H49.988L49.988,0z M50.004,11.21v0.007h-0.016h-0.033V11.21c-10.686,0.007-20.372,4.35-27.384,11.359C15.56,29.578,11.213,39.274,11.21,49.973h0.007v0.016v0.033H11.21c0.007,10.686,4.347,20.367,11.359,27.381c7.009,7.012,16.705,11.359,27.403,11.361v-0.007h0.016h0.033v0.007c10.686-0.007,20.368-4.348,27.382-11.359c7.011-7.009,11.358-16.702,11.36-27.4h-0.006v-0.016v-0.033h0.006c-0.006-10.686-4.35-20.372-11.358-27.384C70.396,15.56,60.703,11.213,50.004,11.21L50.004,11.21z"/></svg>
+      </div>
+      <span class="btn-label">Explore</span>
+    </button>
+
+  </div>
+</div>
+
+<script>
+  const svgi = {
+    iter: '<svg viewBox="0 0 118.04 122.88"><path d="M16.08,59.26A8,8,0,0,1,0,59.26a59,59,0,0,1,97.13-45V8a8,8,0,1,1,16.08,0V33.35a8,8,0,0,1-8,8L80.82,43.62a8,8,0,1,1-1.44-15.95l8-.73A43,43,0,0,0,16.08,59.26Zm22.77,19.6a8,8,0,0,1,1.44,16l-10.08.91A42.95,42.95,0,0,0,102,63.86a8,8,0,0,1,16.08,0A59,59,0,0,1,22.3,110v4.18a8,8,0,0,1-16.08,0V89.14h0a8,8,0,0,1,7.29-8l25.31-2.3Z"/></svg>',
+    piv:  '<svg viewBox="0 0 122.88 122.88"><path d="M61.44,0A61.46,61.46,0,1,1,18,18,61.21,61.21,0,0,1,61.44,0ZM77,57.42l-7.23,4.11a7.56,7.56,0,0,1-.25,1.57,8,8,0,0,1-9.75,5.63,8.19,8.19,0,0,1-1.58-.61l-7.66,4.36L81.43,95.23,77,57.42ZM46.55,65.88l7.37-4.19A7.86,7.86,0,0,1,54.16,59a8,8,0,0,1,9.75-5.63,8.28,8.28,0,0,1,2.55,1.2L73,50.82,42.14,28.07l4.41,37.81ZM95.36,27.52a48,48,0,1,0,14,33.92,47.82,47.82,0,0,0-14-33.92Z"/></svg>',
+    exp:  '<svg viewBox="0 0 122.879 119.799"><path d="M49.988,0h0.016v0.007C63.803,0.011,76.298,5.608,85.34,14.652c9.027,9.031,14.619,21.515,14.628,35.303h0.007v0.033v0.04h-0.007c-0.005,5.557-0.917,10.905-2.594,15.892c-0.281,0.837-0.575,1.641-0.877,2.409v0.007c-1.446,3.66-3.315,7.12-5.547,10.307l29.082,26.139l0.018,0.016l0.157,0.146l0.011,0.011c1.642,1.563,2.536,3.656,2.649,5.78c0.11,2.1-0.543,4.248-1.979,5.971l-0.011,0.016l-0.175,0.203l-0.035,0.035l-0.146,0.16l-0.016,0.021c-1.565,1.642-3.654,2.534-5.78,2.646c-2.097,0.111-4.247-0.54-5.971-1.978l-0.015-0.011l-0.204-0.175l-0.029-0.024L78.761,90.865c-0.88,0.62-1.778,1.209-2.687,1.765c-1.233,0.755-2.51,1.466-3.813,2.115c-6.699,3.342-14.269,5.222-22.272,5.222v0.007h-0.016v-0.007c-13.799-0.004-26.296-5.601-35.338-14.645C5.605,76.291,0.016,63.805,0.007,50.021H0v-0.033v-0.016h0.007c0.004-13.799,5.601-26.296,14.645-35.338C23.683,5.608,36.167,0.016,49.955,0.007V0H49.988L49.988,0z M50.004,11.21v0.007h-0.016h-0.033V11.21c-10.686,0.007-20.372,4.35-27.384,11.359C15.56,29.578,11.213,39.274,11.21,49.973h0.007v0.016v0.033H11.21c0.007,10.686,4.347,20.367,11.359,27.381c7.009,7.012,16.705,11.359,27.403,11.361v-0.007h0.016h0.033v0.007c10.686-0.007,20.368-4.348,27.382-11.359c7.011-7.009,11.358-16.702,11.36-27.4h-0.006v-0.016v-0.033h0.006c-0.006-10.686-4.35-20.372-11.358-27.384C70.396,15.56,60.703,11.213,50.004,11.21L50.004,11.21z"/></svg>'
+  };
+
+  const data = {
+    iter: {
+      label:   'Iterate',
+      tagline: 'Refine your approach based on what you learned',
+      body:    'You keep the same focus — acquisition or conversion — but refine the approach based on what you learned. If your outreach hypothesis was partially confirmed but response rates were lower than expected, you might test a different message format or a more specific prospect segment.',
+      when:    'Sprint 1 results were promising but not conclusive.'
+    },
+    piv: {
+      label:   'Pivot',
+      tagline: 'Shift to a more urgent question',
+      body:    'You shift from one focus to another. If Sprint 1 revealed that your acquisition approach is generating qualified leads but those leads are not converting, Sprint 2 might shift to a conversion hypothesis.',
+      when:    'Sprint 1 clearly answered one question and pointed toward a different, more urgent one.'
+    },
+    exp: {
+      label:   'Explore',
+      tagline: 'Follow a new line of inquiry',
+      body:    'You test something new that Sprint 1 surfaced but did not address. Sprint 1 conversations may have revealed a segment of your ICP that responds differently than expected, or a use case you had not fully considered.',
+      when:    'Sprint 1 opened a genuinely new line of inquiry worth investigating before committing to a direction.'
+    }
+  };
+
+  const panel = document.getElementById('panel');
+  const btns  = {
+    iter: document.getElementById('btn-iter'),
+    piv:  document.getElementById('btn-piv'),
+    exp:  document.getElementById('btn-exp')
+  };
+
+  let current = null;
+
+  function go(key) {
+    if (current === key) return;
+    current = key;
+    const d = data[key];
+
+    panel.className = 'panel ' + key;
+    panel.style.alignItems  = 'flex-start';
+    panel.style.textAlign   = 'left';
+    panel.style.justifyContent = 'flex-start';
+
+    panel.innerHTML = `
+      <div class="panel-header">
+        <div class="panel-icon-ring">${svgi[key]}</div>
+        <div>
+          <p class="panel-eyebrow">Your next sprint</p>
+          <p class="panel-title">${d.label}</p>
+        </div>
+      </div>
+      <p class="panel-tagline">${d.tagline}</p>
+      <p class="panel-body">${d.body}</p>
+      <div class="panel-when">
+        <p class="panel-when-label">Right when</p>
+        <p class="panel-when-text">${d.when}</p>
+      </div>`;
+
+    Object.entries(btns).forEach(([k, btn]) => {
+      btn.classList.remove('active', 'active-iter', 'active-piv', 'active-exp');
+      if (k === key) btn.classList.add('active', 'active-' + key);
+    });
+  }
+
+  const container = document.getElementById('container');
+  function applyLayout() {
+    container.classList.toggle('is-mobile', container.offsetWidth < 480);
+  }
+  window.addEventListener('resize', applyLayout);
+  applyLayout();
+</script>
+</body>
+</html>
