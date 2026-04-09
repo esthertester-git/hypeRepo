@@ -407,7 +407,7 @@
        ───────────────────────────────────────────────────────────────────── -->
   <div class="launch-bar">
     <a class="launch-btn"
-       href="https://esthertester-git.github.io/hypeRepo/discovery-questions.html"
+       href="https://esthertester-git.github.io/hypeRepo/discovery-questions.html?standalone=true"
        target="_blank"
        rel="noopener noreferrer">
       <svg class="launch-icon" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -638,9 +638,10 @@ function el(tag, cls, text) {
 function raf(fn) { requestAnimationFrame(() => requestAnimationFrame(fn)); }
 function delay(ms, fn) { setTimeout(fn, ms); }
 
-// Hide the launch button when the page is opened directly in a browser tab
-// (i.e. not embedded in an iframe). It only needs to be visible inside the iframe.
-if (window.self === window.top) {
+// Hide the launch button when the page is opened in a new window.
+// The launch button link appends ?standalone=true to the URL, which
+// triggers this check. Remove or change the parameter name below if needed.
+if (new URLSearchParams(window.location.search).get('standalone') === 'true') {
   document.querySelector('.launch-bar').style.display = 'none';
 }
 
