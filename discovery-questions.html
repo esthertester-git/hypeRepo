@@ -409,8 +409,7 @@
     <a class="launch-btn"
        href="https://esthertester-git.github.io/hypeRepo/discovery-questions.html"
        target="_blank"
-       rel="noopener noreferrer"
-       onclick="this.closest('.launch-bar').style.display='none'">
+       rel="noopener noreferrer">
       <svg class="launch-icon" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
         <path d="M8 1h3v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -638,6 +637,12 @@ function el(tag, cls, text) {
 }
 function raf(fn) { requestAnimationFrame(() => requestAnimationFrame(fn)); }
 function delay(ms, fn) { setTimeout(fn, ms); }
+
+// Hide the launch button when the page is opened directly in a browser tab
+// (i.e. not embedded in an iframe). It only needs to be visible inside the iframe.
+if (window.self === window.top) {
+  document.querySelector('.launch-bar').style.display = 'none';
+}
 
 // Mobile detection
 function applyLayout() {
