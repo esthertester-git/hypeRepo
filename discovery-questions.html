@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discovery Questions in Action</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #ffffff;
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 24px 20px 32px;
+    min-height: unset;
+  }
+
+  .container {
+    max-width: 580px;
+    margin: 0 auto;
+  }
+
+  /* ── Header ── */
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #2563eb;
+    margin-bottom: 6px;
+  }
+
+  .title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #9ca3af;
+    margin-bottom: 20px;
+  }
+
+  /* ── Scenario card ── */
+  .scenario-card {
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: 0.03em;
+  }
+
+  .persona-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.2;
+  }
+
+  .persona-role {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-bottom: 7px;
+  }
+
+  .scenario-quote {
+    font-size: 13.5px;
+    color: #374151;
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  /* ── Chat area ── */
+  .chat-area {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    margin-bottom: 12px;
+  }
+
+  .bubble {
+    max-width: 84%;
+    padding: 11px 15px;
+    border-radius: 16px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .bubble.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .bubble-sent {
+    background: #2563eb;
+    color: #ffffff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+
+  .bubble-received {
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
+    color: #374151;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+
+  /* ── Typing indicator ── */
+  .typing {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 13px 16px;
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .typing.visible { opacity: 1; transform: translateY(0); }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    background: #9ca3af;
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .dot:nth-child(2) { animation-delay: 0.18s; }
+  .dot:nth-child(3) { animation-delay: 0.36s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); }
+  }
+
+  /* ── Insight card ── */
+  .insight {
+    background: #eff6ff;
+    border: 1.5px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 8px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.05s,
+                transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.05s;
+  }
+
+  .insight.visible { opacity: 1; transform: translateY(0); }
+
+  .insight-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #2563eb;
+    margin-bottom: 3px;
+  }
+
+  .insight-body {
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.65;
+  }
+
+  /* ── Actions row ── */
+  .actions-row {
+    display: flex;
+    justify-content: flex-end;
+    min-height: 24px;
+    margin-bottom: 16px;
+  }
+
+  .try-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: #2563eb;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .try-btn.visible { opacity: 1; pointer-events: auto; }
+  .try-btn:hover { text-decoration: underline; }
+
+  /* ── Counter ── */
+  .counter {
+    font-size: 12px;
+    font-weight: 500;
+    color: #9ca3af;
+    text-align: center;
+    margin-bottom: 10px;
+    min-height: 18px;
+  }
+
+  /* ── Progress pips ── */
+  .pips {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  .pip {
+    height: 3px;
+    width: 28px;
+    border-radius: 2px;
+    background: #e5e7eb;
+    transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .pip.active { background: #2563eb; width: 36px; }
+  .pip.visited { background: #93c5fd; width: 28px; }
+
+  /* ── Option buttons ── */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: opacity 0.3s ease;
+  }
+
+  .options.hidden { display: none; }
+
+  .opt {
+    width: 100%;
+    text-align: left;
+    background: #ffffff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 11px 16px 11px 46px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    color: #374151;
+    line-height: 1.55;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .opt-num {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .opt:hover:not(:disabled) {
+    border-color: #2563eb;
+    background: #eff6ff;
+    color: #1e3a8a;
+  }
+
+  .opt:hover:not(:disabled) .opt-num {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+  }
+
+  .opt.visited-btn {
+    border-color: #bfdbfe;
+    color: #6b7280;
+    background: #fafcff;
+  }
+
+  .opt.visited-btn .opt-num {
+    background: #93c5fd;
+    border-color: #93c5fd;
+    color: #ffffff;
+  }
+
+  .opt:disabled { cursor: default; }
+
+  /* ── Completion ── */
+  .completion {
+    background: #eff6ff;
+    border: 1.5px solid #bfdbfe;
+    border-radius: 16px;
+    padding: 22px 20px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    display: none;
+  }
+
+  .completion.visible { opacity: 1; transform: translateY(0); }
+
+  .completion-icon { font-size: 26px; margin-bottom: 8px; }
+
+  .completion-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e3a8a;
+    margin-bottom: 6px;
+  }
+
+  .completion-body {
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.65;
+  }
+
+  /* ── Mobile ── */
+  .container.is-mobile .opt {
+    font-size: 13px;
+    padding: 10px 14px 10px 42px;
+  }
+</style>
+</head>
+<body>
+<div class="container" id="container">
+
+  <div class="eyebrow">Sales Skills</div>
+  <div class="title">Discovery Questions in Action</div>
+  <div class="subtitle">Choose a question to ask — then see how the conversation unfolds.</div>
+
+  <!-- Scenario card -->
+  <div class="scenario-card">
+    <div class="avatar">SC</div>
+    <div>
+      <div class="persona-name">Sarah Chen</div>
+      <div class="persona-role">Head of Operations, mid-market SaaS company</div>
+      <div class="scenario-quote">"We've been spending way too much time on manual reporting. It's really slowing us down."</div>
+    </div>
+  </div>
+
+  <!-- Chat area -->
+  <div class="chat-area" id="chatArea"></div>
+
+  <!-- Insight -->
+  <div class="insight" id="insight">
+    <div class="insight-label">Why this works</div>
+    <div class="insight-body" id="insightBody"></div>
+  </div>
+
+  <!-- Try another -->
+  <div class="actions-row">
+    <button class="try-btn" id="tryBtn" onclick="tryAnother()">Try another question →</button>
+  </div>
+
+  <!-- Counter -->
+  <div class="counter" id="counter">Explore all 4 questions</div>
+
+  <!-- Pips -->
+  <div class="pips">
+    <div class="pip" id="pip0"></div>
+    <div class="pip" id="pip1"></div>
+    <div class="pip" id="pip2"></div>
+    <div class="pip" id="pip3"></div>
+  </div>
+
+  <!-- Options -->
+  <div class="options" id="options">
+    <button class="opt" data-index="0" onclick="ask(0)" disabled>
+      <span class="opt-num">1</span>
+      "Tell me about how you currently handle [problem area]. What does that process look like?"
+    </button>
+    <button class="opt" data-index="1" onclick="ask(1)" disabled>
+      <span class="opt-num">2</span>
+      "What is the impact of that on your team, revenue, or customers?"
+    </button>
+    <button class="opt" data-index="2" onclick="ask(2)" disabled>
+      <span class="opt-num">3</span>
+      "What have you already tried? What worked, and what didn't?"
+    </button>
+    <button class="opt" data-index="3" onclick="ask(3)" disabled>
+      <span class="opt-num">4</span>
+      "What would change for you if this problem were solved?"
+    </button>
+  </div>
+
+  <!-- Completion -->
+  <div class="completion" id="completion">
+    <div class="completion-icon">💡</div>
+    <div class="completion-title">You've explored all four questions</div>
+    <div class="completion-body">Each one opens a different door: <strong>process</strong>, <strong>impact</strong>, <strong>history</strong>, and <strong>vision</strong>. Together, they give you the full picture — and help the customer articulate the value of change themselves.</div>
+  </div>
+
+</div>
+
+<script>
+const data = [
+  {
+    q: '"Tell me about how you currently handle reporting. What does that process look like?"',
+    r: "Every Friday, our analysts pull data from three different systems, merge it manually in Excel, and format everything. It takes a day and a half — sometimes two. We lose momentum right when we need it most.",
+    w: "Opens the conversation and establishes specifics. You learn the mechanics of their pain, not just the symptom — giving you the context to ask sharper follow-up questions."
+  },
+  {
+    q: '"What is the impact of that on your team, revenue, or customers?"',
+    r: "Morale, honestly. People joined to do analysis, not data entry. We've also missed a couple of leadership deadlines because the reports weren't ready in time. And customers waiting on project updates feel it too.",
+    w: "Connects the problem to business consequence. This elevates the conversation from process to impact — and impact is what drives decisions to change."
+  },
+  {
+    q: '"What have you already tried? What worked, and what didn\'t?"',
+    r: "We piloted a BI tool about 18 months ago but couldn't get buy-in to maintain it. We looked at hiring a dedicated analyst too, but headcount got frozen. So we're kind of back to where we started.",
+    w: "Surfaces previous attempts before you pitch anything. This signals respect for their experience and ensures you won't propose the same solution they've already rejected."
+  },
+  {
+    q: '"What would change for you if this problem were solved?"',
+    r: "The team would get a full day back each week. But honestly — more than that — we'd finally be making decisions on current data instead of last week's. That's the bigger win.",
+    w: "Gets the customer to articulate the value of solving the problem themselves. When they describe the future state, they're essentially selling themselves — which is far more powerful than any pitch you could make."
+  }
+];
+
+let visited = new Set();
+let currentIdx = null;
+let busy = false;
+
+// Enable buttons after fonts load
+document.fonts.ready.then(() => {
+  document.querySelectorAll('.opt').forEach(b => b.disabled = false);
+});
+
+function ask(idx) {
+  if (busy) return;
+  busy = true;
+
+  currentIdx = idx;
+  visited.add(idx);
+
+  // Disable all buttons during animation
+  document.querySelectorAll('.opt').forEach(b => b.disabled = true);
+
+  // Hide insight + try button
+  const insight = document.getElementById('insight');
+  insight.classList.remove('visible');
+  document.getElementById('tryBtn').classList.remove('visible');
+
+  // Clear chat
+  const chat = document.getElementById('chatArea');
+  chat.innerHTML = '';
+
+  // Sent bubble
+  const sent = el('div', 'bubble bubble-sent', data[idx].q);
+  chat.appendChild(sent);
+  raf(() => sent.classList.add('visible'));
+
+  // Typing indicator
+  delay(420, () => {
+    const typing = document.createElement('div');
+    typing.className = 'typing';
+    typing.id = 'typing';
+    typing.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+    chat.appendChild(typing);
+    raf(() => typing.classList.add('visible'));
+  });
+
+  // Response
+  delay(1900, () => {
+    const t = document.getElementById('typing');
+    if (t) t.remove();
+
+    const recv = el('div', 'bubble bubble-received', data[idx].r);
+    chat.appendChild(recv);
+    raf(() => recv.classList.add('visible'));
+
+    // Insight
+    delay(280, () => {
+      document.getElementById('insightBody').textContent = data[idx].w;
+      raf(() => insight.classList.add('visible'));
+
+      // Pips + counter
+      updatePips();
+      updateCounter();
+
+      // Mark button
+      const btn = document.querySelector(`[data-index="${idx}"]`);
+      btn.classList.add('visited-btn');
+
+      if (visited.size < 4) {
+        document.getElementById('tryBtn').classList.add('visible');
+      } else {
+        showCompletion();
+      }
+
+      busy = false;
+    });
+  });
+}
+
+function tryAnother() {
+  document.querySelectorAll('.opt').forEach(btn => {
+    const i = parseInt(btn.getAttribute('data-index'));
+    btn.disabled = visited.has(i);
+  });
+
+  document.getElementById('chatArea').innerHTML = '';
+  const insight = document.getElementById('insight');
+  insight.classList.remove('visible');
+  document.getElementById('tryBtn').classList.remove('visible');
+}
+
+function updatePips() {
+  for (let i = 0; i < 4; i++) {
+    const pip = document.getElementById('pip' + i);
+    pip.className = 'pip' + (i === currentIdx ? ' active' : visited.has(i) ? ' visited' : '');
+  }
+}
+
+function updateCounter() {
+  const rem = 4 - visited.size;
+  document.getElementById('counter').textContent =
+    rem === 0 ? 'All questions explored' :
+    rem === 1 ? '1 question remaining' :
+    `${rem} questions remaining`;
+}
+
+function showCompletion() {
+  updateCounter();
+  document.getElementById('tryBtn').classList.remove('visible');
+  document.getElementById('options').classList.add('hidden');
+
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('pip' + i).className = 'pip visited';
+  }
+
+  const comp = document.getElementById('completion');
+  comp.style.display = 'block';
+  raf(() => comp.classList.add('visible'));
+}
+
+// Helpers
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  e.className = cls;
+  e.textContent = text;
+  return e;
+}
+function raf(fn) { requestAnimationFrame(() => requestAnimationFrame(fn)); }
+function delay(ms, fn) { setTimeout(fn, ms); }
+
+// Mobile detection
+function applyLayout() {
+  document.getElementById('container').classList.toggle('is-mobile', document.getElementById('container').offsetWidth < 480);
+}
+window.addEventListener('resize', applyLayout);
+applyLayout();
+</script>
+</body>
+</html>
