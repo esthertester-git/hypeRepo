@@ -229,6 +229,13 @@
 </div>
 
 <script>
+  // Hide the launch button when the page is opened in a new window.
+  // The launch button link appends ?standalone=true to the URL, which
+  // triggers this check. Remove or change the parameter name below if needed.
+  if (new URLSearchParams(window.location.search).get('standalone') === 'true') {
+    document.querySelector('.launch-bar').style.display = 'none';
+  }
+
   const CHIPS = [
     { id: 'outbound',  label: 'Outbound'  },
     { id: 'inbound',   label: 'Inbound'   },
